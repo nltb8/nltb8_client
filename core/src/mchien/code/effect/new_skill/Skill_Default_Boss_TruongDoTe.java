@@ -1,0 +1,29 @@
+package mchien.code.effect.new_skill;
+
+import mchien.code.model.Actor;
+import mchien.code.model.DataSkillEff;
+import mchien.code.model.Effect;
+
+public class Skill_Default_Boss_TruongDoTe extends Effect {
+   public Skill_Default_Boss_TruongDoTe(Actor tg, int idEff) {
+      this.target = tg;
+      DataSkillEff eff = new DataSkillEff(idEff, this.x, this.y, 0L);
+      eff.x = this.target.x;
+      eff.y = (short)(this.target.y + this.target.getHeight() / 2);
+      this.target.addEffectSkill(eff, this.target.x, this.target.y + this.target.getHeight() / 2);
+      this.target.jum();
+      this.doDestroy();
+   }
+
+   public void update() {
+      super.update();
+      if (this.wantDestroy && this.target != null) {
+         if (this.dame == 0) {
+            this.isDame0 = true;
+         }
+
+         this.startFlyText(this.dame, 0, this.target.x, this.target.y, 0, 0, 1);
+      }
+
+   }
+}

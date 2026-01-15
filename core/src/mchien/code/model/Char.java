@@ -28,10 +28,11 @@ import lib.mVector;
 import lib2.mFont;
 
 public class Char extends LiveActor {
-    public static final byte DOWN = 0;
-    public static final byte UP = 1;
-    public static final byte LEFT = 2;
-    public static final byte RIGHT = 3;
+    // Direction constants - use CharacterRenderConstants for new code
+    public static final byte DOWN = CharacterRenderConstants.DIR_DOWN;
+    public static final byte UP = CharacterRenderConstants.DIR_UP;
+    public static final byte LEFT = CharacterRenderConstants.DIR_LEFT;
+    public static final byte RIGHT = CharacterRenderConstants.DIR_RIGHT;
     public byte frame = 0;
     public byte framePhiPhong;
     public byte tickPhiPhong;
@@ -195,15 +196,16 @@ public class Char extends LiveActor {
     public boolean isNo;
     public boolean isDoing;
     public boolean indexWearing;
-    public static final byte A_STAND = 0;
-    public static final byte A_RUN = 1;
-    public static final byte A_ATTACK = 2;
-    public static final byte A_DEAD = 3;
-    public static final byte A_COME_HOME = 4;
-    public static final byte MOVETOFIRST = 5;
-    public static final byte RUN_AND_ATTACK = 6;
-    public static final byte A_RUN_FRAME_ATTACK = 7;
-    public static final byte A_FLASH = 8;
+    // State constants - use CharacterRenderConstants for new code
+    public static final byte A_STAND = CharacterRenderConstants.STATE_STAND;
+    public static final byte A_RUN = CharacterRenderConstants.STATE_RUN;
+    public static final byte A_ATTACK = CharacterRenderConstants.STATE_ATTACK;
+    public static final byte A_DEAD = CharacterRenderConstants.STATE_DEAD;
+    public static final byte A_COME_HOME = CharacterRenderConstants.STATE_COME_HOME;
+    public static final byte MOVETOFIRST = CharacterRenderConstants.STATE_MOVE_TO_FIRST;
+    public static final byte RUN_AND_ATTACK = CharacterRenderConstants.STATE_RUN_AND_ATTACK;
+    public static final byte A_RUN_FRAME_ATTACK = CharacterRenderConstants.STATE_RUN_FRAME_ATTACK;
+    public static final byte A_FLASH = CharacterRenderConstants.STATE_FLASH;
     public int charDBID;
     public boolean isWearing;
     public boolean isMaininfo;
@@ -233,16 +235,18 @@ public class Char extends LiveActor {
     public byte idImgHorse;
     byte xShadow;
     public static boolean paintOrtherChar = true;
-    static byte HEAD = 0;
-    static byte BODY = 1;
-    static byte LEG = 2;
-    static byte WEAPON = 3;
-    static byte PHI_PHONG = 4;
-    public static byte THIEU_LAM = 0;
-    public static byte CAI_BANG = 1;
-    public static byte NGA_MI = 2;
-    public static byte VO_DANG = 3;
-    public static byte NGU_DOC = 4;
+    // Part constants - use CharacterRenderConstants for new code
+    static byte HEAD = CharacterRenderConstants.PART_HEAD;
+    static byte BODY = CharacterRenderConstants.PART_BODY;
+    static byte LEG = CharacterRenderConstants.PART_LEG;
+    static byte WEAPON = CharacterRenderConstants.PART_WEAPON;
+    static byte PHI_PHONG = CharacterRenderConstants.PART_PHI_PHONG;
+    // Class constants - use CharacterRenderConstants for new code
+    public static byte THIEU_LAM = CharacterRenderConstants.CLASS_THIEU_LAM;
+    public static byte CAI_BANG = CharacterRenderConstants.CLASS_CAI_BANG;
+    public static byte NGA_MI = CharacterRenderConstants.CLASS_NGA_MI;
+    public static byte VO_DANG = CharacterRenderConstants.CLASS_VO_DANG;
+    public static byte NGU_DOC = CharacterRenderConstants.CLASS_NGU_DOC;
     public static short[][][] idPartTest = new short[][][]{{{33, 71, 73, 22}, {33, 249, 250, 12}, {33, 251, 252, 12}, {33, 253, 254, 12}, {33, 255, 256, 12}}, {{51, 267, 268, 58}, {51, 269, 270, 12}, {51, 271, 272, 12}, {51, 273, 274, 12}, {51, 275, 276, 12}}, {{34, 209, 210, 14}, {34, 211, 212, 14}, {34, 213, 214, 14}, {34, 215, 216, 14}, {34, 217, 218, 14}}, {{60, 277, 278, 12}, {60, 279, 280, 12}, {60, 281, 282, 12}, {60, 283, 284, 12}, {60, 285, 286, 12}}, {{52, 229, 230, 297}, {52, 231, 232, 12}, {52, 233, 234, 12}, {52, 235, 236, 12}, {52, 237, 238, 12}}};
     public static final byte[][][] FRAME_START_ATTACK = new byte[][][]{{{35, 35, 35, 35, 35, 35, 35, 35, 34, 32, 33, 33}, {47, 47, 47, 47, 47, 47, 47, 48, 49, 50, 51, 51}, {42, 42, 42, 42, 42, 42, 42, 43, 44, 46, 46, 46, 46}, {37, 37, 37, 37, 37, 37, 37, 38, 39, 41, 41, 41, 41}}, {{35, 34, 32, 33, 33, 33, 33, 33, 33, 33, 33}, {47, 48, 49, 50, 51, 51, 51, 51, 51, 51, 51, 51}, {42, 43, 44, 46, 46, 46, 46, 46, 46, 46, 46}, {37, 38, 39, 41, 41, 41, 41, 41, 41, 41, 41}}, {{35, 34, 32, 33, 33}, {47, 48, 49, 50, 51, 51}, {42, 43, 44, 46, 46}, {37, 38, 39, 41, 41}}, {{35, 35, 35, 35, 35, 35, 34, 34, 32, 32, 33, 33, 33, 33, 33, 33}, {47, 47, 47, 47, 47, 47, 48, 48, 49, 49, 50, 50, 51, 51, 51, 51, 51, 51}, {42, 42, 42, 42, 42, 42, 43, 43, 44, 44, 46, 46, 46, 46, 46, 46}, {37, 37, 37, 37, 37, 37, 38, 38, 39, 39, 41, 41, 41, 41, 41, 41}}, {{35, 34, 32, 36, 33}, {47, 48, 49, 50, 51}, {42, 43, 44, 45, 46}, {37, 38, 39, 40, 41}}};
     public short lv;
@@ -646,77 +650,124 @@ public class Char extends LiveActor {
         this.isDie = false;
     }
 
+    /**
+     * Paints the character's shadow based on state and position.
+     * Refactored for better readability with extracted helper methods.
+     */
     public void paintShadow(mGraphics g) {
+        // Early returns for special cases
+        if (!shouldPaintShadow()) {
+            return;
+        }
+        
+        // Handle flying characters separately
         if (this.isPhiHanh) {
-            Image shadow = this.getShadow();
-            if (shadow != null) {
-                g.drawImage(shadow, this.x, this.y - 2, 3, false);
-            }
+            paintFlyingShadow(g);
             return;
         }
-        if (this.isWater) {
-            return;
-        }
-        if (!this.canPaint()) {
-            return;
-        }
-        int xs = 0;
-        int ys = 0;
-        if (this.state == 0 && this.dir == 0) {
-            xs = 0;
-            ys = -1;
-        }
-        if (this.state == 0 && this.dir == 1) {
-            xs = 1;
-            ys = 0;
-        }
-        if (this.state == 0 && this.dir == 2) {
-            xs = -1;
-            ys = -2;
-        }
-        if (this.state == 0 && this.dir == 3) {
-            xs = 0;
-            ys = -2;
-        }
-        if ((this.state == 1 || this.state == 6 || this.state == 7 || this.state == 2) && this.dir == 2) {
-            xs = 10;
-            if (this.state == 2 || this.state == 7) {
-                xs = 0;
-            }
-        }
-        if ((this.state == 1 || this.state == 6 || this.state == 7 || this.state == 2) && this.dir == 3) {
-            xs = -7;
-            if (this.state == 2 || this.state == 7) {
-                xs = 1;
-            }
-        }
-        if ((this.state == 1 || this.state == 6 || this.state == 7 || this.state == 2) && this.dir == 0) {
-            xs = -3;
-            if (this.state == 2 || this.state == 7) {
-                xs = 4;
-                ys = -1;
-            }
-        }
-        if (!(this.state != 1 && this.state != 6 && this.state != 7 && this.state != 2 || this.dir != 1 || this.state != 2 && this.state != 7)) {
-            xs = 4;
-            ys = -2;
-        }
+        
+        // Calculate shadow offset and paint
+        int xs = calculateShadowXOffset();
+        int ys = calculateShadowYOffset();
+        
         DataSkillEff partThuCuoi = Char.loadPartPhiPhongThuCuoi(this.idHorse);
         Image shadow = this.getShadow();
+        
         if (shadow != null) {
-            xs = 0;
-            ys = -3;
-            if (this.state == 1) {
-                ys = 0;
-            }
             int xsd = this.x + xs;
-            int ysd = this.y - 2 + ys;
+            int ysd = this.y + CharacterRenderConstants.SHADOW_Y_OFFSET + ys;
+            
+            // Adjust for mount
             if (partThuCuoi != null) {
                 xsd = this.x;
-                ysd = this.y + 6;
+                ysd = this.y + CharacterRenderConstants.MOUNT_DY_DEFAULT;
             }
+            
             g.drawImage(shadow, xsd, ysd, mGraphics.VCENTER | mGraphics.HCENTER, false);
         }
+    }
+    
+    /**
+     * Determines if shadow should be painted.
+     */
+    private boolean shouldPaintShadow() {
+        return !this.isWater && this.canPaint();
+    }
+    
+    /**
+     * Paints shadow for flying characters.
+     */
+    private void paintFlyingShadow(mGraphics g) {
+        Image shadow = this.getShadow();
+        if (shadow != null) {
+            g.drawImage(shadow, this.x, this.y + CharacterRenderConstants.SHADOW_Y_OFFSET, 3, false);
+        }
+    }
+    
+    /**
+     * Calculates X offset for shadow based on character state and direction.
+     */
+    private int calculateShadowXOffset() {
+        int xs = 0;
+        
+        // Standing state offsets
+        if (this.state == A_STAND) {
+            if (this.dir == LEFT) xs = -1;
+            else if (this.dir == UP) xs = 1;
+            // DOWN and RIGHT remain 0
+            return xs;
+        }
+        
+        // Moving/attacking state offsets
+        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK || 
+                                       this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
+        
+        if (isMovingOrAttacking) {
+            boolean isAttacking = (this.state == A_ATTACK || this.state == A_RUN_FRAME_ATTACK);
+            
+            if (this.dir == LEFT) {
+                xs = isAttacking ? 0 : 10;
+            } else if (this.dir == RIGHT) {
+                xs = isAttacking ? 1 : -7;
+            } else if (this.dir == DOWN) {
+                xs = isAttacking ? 4 : -3;
+            } else if (this.dir == UP && isAttacking) {
+                xs = 4;
+            }
+        }
+        
+        return xs;
+    }
+    
+    /**
+     * Calculates Y offset for shadow based on character state and direction.
+     */
+    private int calculateShadowYOffset() {
+        int ys = 0;
+        
+        // Standing state offsets
+        if (this.state == A_STAND) {
+            if (this.dir == UP) ys = 0;
+            else if (this.dir == LEFT || this.dir == RIGHT) ys = -2;
+            else ys = -1; // DOWN
+            return ys;
+        }
+        
+        // Moving/attacking state offsets
+        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK || 
+                                       this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
+        boolean isAttacking = (this.state == A_ATTACK || this.state == A_RUN_FRAME_ATTACK);
+        
+        if (isMovingOrAttacking) {
+            if (this.dir == DOWN && isAttacking) {
+                ys = -1;
+            } else if (this.dir == UP && isAttacking) {
+                ys = -2;
+            }
+            // Other cases remain 0
+        }
+        
+        return ys;
     }
 
     public Image getShadow() {
@@ -2235,37 +2286,46 @@ public class Char extends LiveActor {
     }
 
 
+    /**
+     * Sets character parts for shop/preview rendering.
+     * Simplified using CharacterPartLoader.
+     * 
+     * @param listPart Array of part IDs [HEAD, BODY, LEG, WEAPON]
+     */
     public void setInfoWearingShopModel(short[] listPart) {
         this.partShopPaint.removeAllElements();
-        if (this.partShopPaint.size() == 0) {
-            Chunk ph = Chunk.getHead(listPart[HEAD], this.getGender());
-            Chunk pb = Chunk.getBody(listPart[BODY], this.getGender());
-            Chunk pl = Chunk.getLeg(listPart[LEG], this.getGender());
-            Chunk pw = Chunk.getWeapon(listPart[WEAPON]);
-            this.partShopPaint.addElement(ph);
-            this.partShopPaint.addElement(pb);
-            this.partShopPaint.addElement(pl);
-            this.partShopPaint.addElement(pw);
+        
+        // Use CharacterPartLoader to create part vector
+        mVector parts = CharacterPartLoader.createPartVector(listPart, this.getGender());
+        
+        // Copy parts to partShopPaint
+        for (int i = 0; i < parts.size(); i++) {
+            this.partShopPaint.addElement(parts.elementAt(i));
         }
-
     }
 
+    /**
+     * Sets the character's wearing/equipment parts for rendering.
+     * Simplified using CharacterPartLoader for better maintainability.
+     * 
+     * @param listPart Array of part IDs [HEAD, BODY, LEG, WEAPON]
+     */
     public void setInfoWearing(short[] listPart) {
         this.partPaint.removeAllElements();
-        if (this.partPaint.size() == 0) {
-            this.myListPart = listPart;
-            if (!this.isMainChar() && !this.isNPC() && !paintOrtherChar) {
-                return;
-            }
-
-            Chunk ph = Chunk.getHead(listPart[HEAD], this.getGender());
-            Chunk pb = Chunk.getBody(listPart[BODY], this.getGender());
-            Chunk pl = Chunk.getLeg(listPart[LEG], this.getGender());
-            Chunk pw = Chunk.getWeapon(listPart[WEAPON]);
-            this.partPaint.addElement(ph);
-            this.partPaint.addElement(pb);
-            this.partPaint.addElement(pl);
-            this.partPaint.addElement(pw);
+        this.myListPart = listPart;
+        
+        // Skip loading for non-main characters when other char painting is disabled
+        if (!this.isMainChar() && !this.isNPC() && !paintOrtherChar) {
+            return;
+        }
+        
+        // Use CharacterPartLoader to create part vector
+        mVector parts = CharacterPartLoader.createPartVector(listPart, this.getGender());
+        
+        // Copy parts to partPaint
+        for (int i = 0; i < parts.size(); i++) {
+            this.partPaint.addElement(parts.elementAt(i));
+        }
         }
 
     }

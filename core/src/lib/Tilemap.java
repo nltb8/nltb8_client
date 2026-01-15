@@ -15,55 +15,168 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import javax.microedition.lcdui.Image;
 
+/**
+ * Tilemap manages the game's tile-based map rendering and data structures.
+ * 
+ * MAP RENDERING PIPELINE:
+ * 1. Map data loaded from files into map[] array (1D array, access via [y*w+x])
+ * 2. Viewport culling computed in GameScr.loadCamera() -> gssx, gssy, gssxe, gssye
+ * 3. paintTile() renders visible tiles in layers:
+ *    - Base tiles from map[] array
+ *    - Animated tiles (water/effects) via frameThac animation
+ *    - Layer 3 overlay tiles from tileLayer3
+ *    - Tree layers (trees, trees2, trees3, etc.)
+ * 4. paintTileTop() renders top-layer tiles from tileTop
+ * 
+ * COORDINATE SYSTEMS:
+ * - Pixel coordinates: World space (mainChar.x, mainChar.y)
+ * - Tile coordinates: Grid space (x_tile = x_pixel / TILE_SIZE)
+ * - Viewport bounds: GameScr.gssx/gssy (start) to gssxe/gssye (end)
+ * 
+ * ZOOM HANDLING:
+ * - mGraphics.zoomLevel scales all drawing operations
+ * - Tile rendering itself doesn't directly use zoomLevel
+ * - Scaling happens in mGraphics layer during drawRegion() calls
+ */
 public class Tilemap {
-   public static int idMusicLang;
-   public static boolean IsThac;
+   // === Tile Dimension Constants ===
+   /** Size of each tile in pixels (16x16) */
+   public static final int TILE_SIZE = 16;
+   /** Bit shift for tile size (2^4 = 16) - used for fast division/multiplication */
+   public static final int TILE_SHIFT = 4;
+   /** Tile width constant (duplicate of TILE_SIZE, kept for compatibility) */
+   public static int wTile = 16;
+   
+   // === Map Dimension Data ===
+   /** Map width in tiles */
    public static int w;
+   /** Map height in tiles */
    public static int h;
+   /** Map width in pixels (w * TILE_SIZE) */
    public static int pxw;
+   /** Map height in pixels (h * TILE_SIZE) */
    public static int pxh;
-   public static int SoundBackRound;
-   public static final int T_BLOCK = 2;
-   public static mVector pointPop = new mVector();
+   
+   // === Map Data Arrays ===
+   /** Tile index array: map[y*w+x] gives tile ID at (x,y) */
    public static short[] map;
+   /** Tile type array: collision/walkability info per tile */
    public static int[] type;
+   /** Tile type lookup table: typeOfTile[tileID] -> collision type */
    public static int[] typeOfTile;
+   
+   // === Map Images and Resources ===
+   /** Pre-rendered minimap image */
    public static Image imgMap;
-   public static short lv = 0;
+   /** Animated tile image (water, decoration effects) */
    public static Image imgThac;
-   public static byte idXaphu = -1;
-   public static int idLinhGac = 0;
-   public static mVector trees = new mVector();
-   public static mVector trees2 = new mVector();
-   public static mVector trees3 = new mVector();
-   public static mVector trees11 = new mVector();
-   public static mVector trees12 = new mVector();
-   public static mVector treesLand = new mVector();
-   public static mHashtable treeLow1 = new mHashtable();
-   public static mHashtable treeLow2 = new mHashtable();
-   public static mHashtable treeLow3 = new mHashtable();
-   public static int WidthMiniMap;
-   public static int HeightMinimap;
-   public static mHashtable treeTop_bottom = new mHashtable();
+   /** Minimap icon image */
+   public static Image imgMapMini;
+   
+   // === Map Metadata ===
+   /** Current map level/ID */
+   public static short lv = 0;
+   /** Tile set ID for this map */
    public static int idTile = -1;
-   public static boolean ismapLang;
-   public static byte sizeBigmap;
-   public static mHashtable tileTop = new mHashtable();
-   public static mHashtable tileLayer3 = new mHashtable();
-   public static short size = 16;
-   public static byte paintLayerTree23 = 1;
-   public static mVector mapchangeLocations = new mVector();
-   public static boolean isOfflineMap;
+   /** Map name for display */
    public static String mapName = "";
-   public static byte frame;
-   public static byte countframe;
+   /** Whether this is a Lang-type special map */
+   public static boolean ismapLang;
+   /** Whether map has animated water tiles */
+   public static boolean IsThac;
+   /** Whether this is offline demo map */
+   public static boolean isOfflineMap;
+   
+   // === Audio Settings ===
+   /** Music ID for Lang-type maps */
+   public static int idMusicLang;
+   /** Background sound ID */
+   public static int SoundBackRound;
+   
+   // === Collision Constants ===
+   /** Tile type constant for blocked/impassable tiles */
+   public static final int T_BLOCK = 2;
+   
+   // === Tree/Object Layers ===
+   /** Tree layer 1 (rendered before player) */
+   public static mVector trees = new mVector();
+   /** Tree layer 2 (conditional rendering based on settings) */
+   public static mVector trees2 = new mVector();
+   /** Tree layer 3 (conditional rendering based on settings) */
+   public static mVector trees3 = new mVector();
+   /** Tree layer 11 (rendered at specific depth) */
+   public static mVector trees11 = new mVector();
+   /** Tree layer 12 (rendered at specific depth) */
+   public static mVector trees12 = new mVector();
+   /** Special land trees (e.g., ID 37, 375, 502) */
+   public static mVector treesLand = new mVector();
+   
+   /** Trees marked as low-priority for layer 1 */
+   public static mHashtable treeLow1 = new mHashtable();
+   /** Trees marked as low-priority for layer 2 */
+   public static mHashtable treeLow2 = new mHashtable();
+   /** Trees marked as low-priority for layer 3 */
+   public static mHashtable treeLow3 = new mHashtable();
+   /** Trees with top and bottom rendering components */
+   public static mHashtable treeTop_bottom = new mHashtable();
+   
+   // === Tile Overlay Layers ===
+   /** Top-layer tiles (rendered after player, e.g., bridges) */
+   public static mHashtable tileTop = new mHashtable();
+   /** Layer 3 tiles (rendered with base tiles) */
+   public static mHashtable tileLayer3 = new mHashtable();
+   
+   // === Animation State ===
+   /** Animation frame sequence for animated tiles */
    public static byte[] frameThac = new byte[]{0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2};
+   /** Current frame index in frameThac array */
+   public static byte countframe;
+   /** Current animation frame value */
+   public static byte frame;
+   
+   // === Map Features ===
+   /** Map change portal locations */
+   public static mVector mapchangeLocations = new mVector();
+   /** Special population points */
+   public static mVector pointPop = new mVector();
+   
+   // === Rendering Settings ===
+   /** Size value used for rendering (usually 16) */
+   public static short size = 16;
+   /** Whether to paint tree layers 2 and 3 */
+   public static byte paintLayerTree23 = 1;
+   /** Size of bigmap tiles (for special large maps like level 7, 39) */
+   public static byte sizeBigmap;
+   
+   // === Internal Constants ===
+   /** Bit shift constant (4 = shift by 4 bits for divide/multiply by 16) */
    public static int sip = 4;
+   
+   // === Minimap Dimensions ===
+   /** Minimap width */
+   public static int WidthMiniMap;
+   /** Minimap height */
+   public static int HeightMinimap;
+   
+   // === Special Map IDs ===
+   /** Array of Lang-type map IDs */
+   public static byte[] All_ID_Map_Lang;
+   
+   // === NPC/Entity IDs ===
+   /** Special NPC ID (Xaphu) */
+   public static byte idXaphu = -1;
+   /** Guard NPC ID */
+   public static int idLinhGac = 0;
+   
+   // === Internal State (used by animation system) ===
    static int song = 0;
    static int tick = 0;
-   public static int wTile = 16;
-   public static byte[] All_ID_Map_Lang;
-   public static Image imgMapMini;
+   
+   // === Performance Cache Variables ===
+   /** Cached tree viewport expansion value (updated only when zoom changes) */
+   private static int cachedTreeViewportExpansion = 0;
+   /** Last zoom level used for tree viewport cache */
+   private static int lastZoomLevelForTreeCache = -1;
 
    public static void getImg() {
    }
@@ -494,7 +607,7 @@ public class Tilemap {
                      int y0 = t / 16;
                      int dx = x0 << sip;
                      int dy = y0 << sip;
-                     pxmap.drawPixmap(pixmap, a * mGraphics.zoomLevel, b * mGraphics.zoomLevel, dx * mGraphics.zoomLevel, dy * mGraphics.zoomLevel, 16 * mGraphics.zoomLevel, 16 * mGraphics.zoomLevel);
+                     pxmap.drawPixmap(pixmap, a * mGraphics.zoomLevel, b * mGraphics.zoomLevel, dx * mGraphics.zoomLevel, dy * mGraphics.zoomLevel, TILE_SIZE * mGraphics.zoomLevel, TILE_SIZE * mGraphics.zoomLevel);
                   }
                }
             }
@@ -509,148 +622,252 @@ public class Tilemap {
       }
    }
 
-   public static final void paintTile(mGraphics g) {
+   // ========================================================================
+   // HELPER METHODS FOR MAP RENDERING
+   // ========================================================================
+
+   /**
+    * Updates the animation frame counter for animated tiles (water, effects).
+    * Called once per frame before rendering.
+    */
+   private static void updateAnimationFrame() {
       ++countframe;
       if (countframe > frameThac.length - 1) {
          countframe = 0;
       }
-
       frame = frameThac[countframe];
-      if (map != null) {
-         int y;
-         int x;
-         int b;
-         int dx;
-         int dy;
-         byte type;
-         int xs;
-         int ys;
-         if (sizeBigmap > 0) {
-            y = 0;
-            x = 0;
-            if (lv == 39 && GameScr.imgBigMap == null) {
-               GameScr.imgBigMap = new Image[14];
-            }
+   }
 
-            if (lv == 7 && GameScr.imgBigMap == null) {
-               GameScr.imgBigMap = new Image[16];
-            }
+   /**
+    * Converts tile grid coordinate to pixel coordinate.
+    * @param tileCoord Tile coordinate (x or y in grid space)
+    * @return Pixel coordinate (world space)
+    */
+   private static int tileToPixel(int tileCoord) {
+      return tileCoord << TILE_SHIFT;  // Multiply by 16 using bit shift
+   }
 
-            int i;
-            if (GameScr.imgBigMap != null) {
-               try {
-                  for(i = 0; i < GameScr.imgBigMap.length; ++i) {
-                     Image img = null;
-                     if (GameScr.imgBigMap[i] != null) {
-                        img = GameScr.imgBigMap[i];
-                     }
+   /**
+    * Gets the linear array index for a tile at (x, y) in the map grid.
+    * @param x Tile x coordinate
+    * @param y Tile y coordinate
+    * @return Linear index into map[] array
+    */
+   private static int getTileIndex(int x, int y) {
+      return y * w + x;
+   }
 
-                     if (img == null) {
-                        String path = "bigimgmap" + i + "@" + lv;
-                        if (mSystem.isAndroid && lv == 39) {
-                           path = "/big2/" + i + ".png";
-                        }
+   /**
+    * Updates the cached tree viewport expansion value.
+    * Should be called when zoom level changes or Res.maxHTree changes.
+    */
+   private static void updateTreeViewportCache() {
+      if (mGraphics.zoomLevel != lastZoomLevelForTreeCache) {
+         cachedTreeViewportExpansion = Res.maxHTree / (size * mGraphics.zoomLevel) + 1;
+         lastZoomLevelForTreeCache = mGraphics.zoomLevel;
+      }
+   }
 
-                        if (mSystem.isAndroid && lv == 7) {
-                           path = "/big/" + i + ".png";
-                        }
+   /**
+    * Gets the cached tree viewport expansion value.
+    * This value is used to expand the visible tile range for tree rendering
+    * to account for tall trees that extend beyond their base tile.
+    * @return Number of extra tiles to render beyond viewport bounds
+    */
+   private static int getTreeViewportExpansion() {
+      updateTreeViewportCache();
+      return cachedTreeViewportExpansion;
+   }
 
-                        img = GameCanvas.loadImage(path);
-                        if (img == null) {
-                           GameService.gI().RequestImgBigmap((byte)i);
-                        }
+   /**
+    * Renders tiles for big map mode (levels 7 and 39 with pre-rendered tile images).
+    * Big maps use 256x256 pre-rendered images instead of individual tiles.
+    * @param g Graphics context for rendering
+    */
+   private static void paintBigMapTiles(mGraphics g) {
+      int y = 0;
+      int x = 0;
+      
+      // Initialize bigmap arrays if needed
+      if (lv == 39 && GameScr.imgBigMap == null) {
+         GameScr.imgBigMap = new Image[14];
+      }
+      if (lv == 7 && GameScr.imgBigMap == null) {
+         GameScr.imgBigMap = new Image[16];
+      }
 
-                        if (img != null && GameScr.imgBigMap != null) {
-                           GameScr.imgBigMap[i] = img;
-                        }
-                     }
-
-                     if (img != null && x + img.getWidth() >= GameScr.cmx && x <= GameScr.cmx + GameCanvas.w && y + img.getHeight() >= GameScr.cmy && y <= GameScr.cmy + GameCanvas.h) {
-                        g.drawImage(img, x, y, 0, false);
-                     }
-
-                     x += 256;
-                     if (x >= w * size) {
-                        x = 0;
-                        y += 256;
-                     }
+      if (GameScr.imgBigMap != null) {
+         try {
+            // Render each 256x256 bigmap tile
+            for(int i = 0; i < GameScr.imgBigMap.length; ++i) {
+               Image img = GameScr.imgBigMap[i];
+               
+               // Load bigmap image if not yet loaded
+               if (img == null) {
+                  String path = "bigimgmap" + i + "@" + lv;
+                  if (mSystem.isAndroid && lv == 39) {
+                     path = "/big2/" + i + ".png";
                   }
-               } catch (Exception var11) {
-               }
-            }
-
-            for(i = GameCanvas.gameScr.gssx; i < GameCanvas.gameScr.gssxe; ++i) {
-               for(b = GameCanvas.gameScr.gssy; b < GameCanvas.gameScr.gssye && map != null; ++b) {
-                  int t = map[b * w + i];
-                  if (t != 255) {
-                     dx = t % 16;
-                     dy = t / 16;
-                     type = getTypeThac(idTile, dx, dy);
-                     if (type != -1) {
-                        xs = type % 16;
-                        ys = type / 16;
-                        g.drawRegion(imgThac, xs * 16, frame * 16 + ys * 48, 16, 16, 0, i << sip, b << sip, 0, false);
-                     }
+                  if (mSystem.isAndroid && lv == 7) {
+                     path = "/big/" + i + ".png";
                   }
-
-                  TileTop top = (TileTop)tileLayer3.get(String.valueOf(b * w + i));
-                  if (top != null) {
-                     top.paint(g);
+                  
+                  img = GameCanvas.loadImage(path);
+                  if (img == null) {
+                     GameService.gI().RequestImgBigmap((byte)i);
                   }
-               }
-            }
-         } else {
-            y = GameCanvas.gameScr.gssx;
-
-            while(true) {
-               if (y >= GameCanvas.gameScr.gssxe) {
-                  if (MainUnity.isJava && paintLayerTree23 == 1 || !MainUnity.isJava || MainUnity.isJava && lv == 44) {
-                     paintTreeLayer(g, trees2, 2);
-                     paintTreeLayer(g, trees3, 3);
-                  }
-                  break;
-               }
-
-               for(x = GameCanvas.gameScr.gssy; x < GameCanvas.gameScr.gssye && map != null; ++x) {
-                  int t = map[x * w + y];
-                  if (t != 255) {
-                     b = t % 16;
-                     int y0 = t / 16;
-                     dx = b << sip;
-                     dy = y0 << sip;
-                     type = -1;
-                     if (!mSystem.isj2me) {
-                        type = getTypeThac(idTile, b, y0);
-                     }
-
-                     if (type != -1) {
-                        xs = type % 16;
-                        ys = type / 16;
-                        g.drawRegion(imgThac, xs * 16, frame * 16 + ys * 48, 16, 16, 0, y << sip, x << sip, 0, false);
-                     } else if (Res.imgTile == null) {
-                        loadTileMap();
-                     } else {
-                        g.drawRegion(Res.imgTile, dx, dy, 16, 16, 0, y << sip, x << sip, 0, false);
-                     }
-                  }
-
-                  TileTop top = (TileTop)tileLayer3.get(String.valueOf(x * w + y));
-                  if (top != null) {
-                     top.paint(g);
+                  if (img != null) {
+                     GameScr.imgBigMap[i] = img;
                   }
                }
 
-               ++y;
-            }
-         }
+               // Only draw if in viewport
+               if (img != null && x + img.getWidth() >= GameScr.cmx && x <= GameScr.cmx + GameCanvas.w 
+                   && y + img.getHeight() >= GameScr.cmy && y <= GameScr.cmy + GameCanvas.h) {
+                  g.drawImage(img, x, y, 0, false);
+               }
 
-         paintTreeLayer(g, treesLand, -1);
-         if (!GameCanvas.currentScreen.isGameScreen() && !mSystem.isj2me) {
-            paintTreeLayer(g, trees12, 12);
-            paintTreeLayer(g, trees, 1);
+               // Move to next bigmap position (256 pixel increments)
+               x += 256;
+               if (x >= w * size) {
+                  x = 0;
+                  y += 256;
+               }
+            }
+         } catch (Exception e) {
+            // Silently catch exceptions during bigmap rendering
          }
       }
 
+      // Render overlay tiles for bigmap mode
+      paintOverlayTilesInViewport(g);
+   }
+
+   /**
+    * Renders animated overlay tiles (water, effects) within the viewport.
+    * Used by big map rendering path.
+    * @param g Graphics context for rendering
+    */
+   private static void paintOverlayTilesInViewport(mGraphics g) {
+      for(int i = GameCanvas.gameScr.gssx; i < GameCanvas.gameScr.gssxe; ++i) {
+         for(int j = GameCanvas.gameScr.gssy; j < GameCanvas.gameScr.gssye && map != null; ++j) {
+            int tileId = map[getTileIndex(i, j)];
+            if (tileId != 255) {
+               // Get tile position in atlas
+               int atlasX = tileId % 16;
+               int atlasY = tileId / 16;
+               byte animType = getTypeThac(idTile, atlasX, atlasY);
+               
+               // Draw animated tile if this tile has animation
+               if (animType != -1) {
+                  int animAtlasX = animType % 16;
+                  int animAtlasY = animType / 16;
+                  g.drawRegion(imgThac, animAtlasX * TILE_SIZE, frame * TILE_SIZE + animAtlasY * 48, 
+                              TILE_SIZE, TILE_SIZE, 0, tileToPixel(i), tileToPixel(j), 0, false);
+               }
+            }
+
+            // Draw layer 3 overlay tile if present
+            TileTop top = (TileTop)tileLayer3.get(String.valueOf(getTileIndex(i, j)));
+            if (top != null) {
+               top.paint(g);
+            }
+         }
+      }
+   }
+
+   /**
+    * Renders standard tiles (non-bigmap mode) within the viewport.
+    * This is the main tile rendering path for most maps.
+    * @param g Graphics context for rendering
+    */
+   private static void paintStandardTiles(mGraphics g) {
+      // Iterate through visible tile columns
+      for(int tileX = GameCanvas.gameScr.gssx; tileX < GameCanvas.gameScr.gssxe; ++tileX) {
+         // Iterate through visible tile rows
+         for(int tileY = GameCanvas.gameScr.gssy; tileY < GameCanvas.gameScr.gssye && map != null; ++tileY) {
+            int tileId = map[getTileIndex(tileX, tileY)];
+            if (tileId != 255) {
+               // Get tile position in tile atlas (16x16 grid)
+               int atlasX = tileId % 16;
+               int atlasY = tileId / 16;
+               int atlasPixelX = atlasX << TILE_SHIFT;  // Multiply by 16
+               int atlasPixelY = atlasY << TILE_SHIFT;
+               
+               byte animType = -1;
+               if (!mSystem.isj2me) {
+                  animType = getTypeThac(idTile, atlasX, atlasY);
+               }
+
+               // Draw animated tile or base tile
+               if (animType != -1) {
+                  int animAtlasX = animType % 16;
+                  int animAtlasY = animType / 16;
+                  g.drawRegion(imgThac, animAtlasX * TILE_SIZE, frame * TILE_SIZE + animAtlasY * 48, 
+                              TILE_SIZE, TILE_SIZE, 0, tileToPixel(tileX), tileToPixel(tileY), 0, false);
+               } else if (Res.imgTile == null) {
+                  loadTileMap();
+               } else {
+                  g.drawRegion(Res.imgTile, atlasPixelX, atlasPixelY, TILE_SIZE, TILE_SIZE, 
+                              0, tileToPixel(tileX), tileToPixel(tileY), 0, false);
+               }
+            }
+
+            // Draw layer 3 overlay tile if present
+            TileTop top = (TileTop)tileLayer3.get(String.valueOf(getTileIndex(tileX, tileY)));
+            if (top != null) {
+               top.paint(g);
+            }
+         }
+      }
+
+      // Render conditional tree layers after base tiles
+      if (MainUnity.isJava && paintLayerTree23 == 1 || !MainUnity.isJava || MainUnity.isJava && lv == 44) {
+         paintTreeLayer(g, trees2, 2);
+         paintTreeLayer(g, trees3, 3);
+      }
+   }
+
+   /**
+    * Main tile rendering method called every frame by GameScr.
+    * Renders the visible portion of the map in multiple layers:
+    * 1. Base tiles or bigmap tiles
+    * 2. Animated tiles (water, effects)
+    * 3. Layer 3 overlay tiles
+    * 4. Tree layers (various depths)
+    * 
+    * VIEWPORT CULLING:
+    * Uses GameScr.gssx/gssy (start) to gssxe/gssye (end) for visible tiles.
+    * These bounds are computed in GameScr.loadCamera() based on camera position.
+    * 
+    * PERFORMANCE NOTES:
+    * - Uses bit shifts for fast tile-to-pixel conversion (x << 4 = x * 16)
+    * - Caches tree viewport expansion calculation
+    * - Splits big map vs standard rendering paths for clarity
+    * 
+    * @param g Graphics context for rendering
+    */
+   public static final void paintTile(mGraphics g) {
+      // Update animation frame for water/effects
+      updateAnimationFrame();
+      
+      if (map == null) {
+         return;
+      }
+
+      // Render base tiles (bigmap or standard)
+      if (sizeBigmap > 0) {
+         paintBigMapTiles(g);
+      } else {
+         paintStandardTiles(g);
+      }
+
+      // Render tree layers (always rendered after base tiles)
+      paintTreeLayer(g, treesLand, -1);
+      if (!GameCanvas.currentScreen.isGameScreen() && !mSystem.isj2me) {
+         paintTreeLayer(g, trees12, 12);
+         paintTreeLayer(g, trees, 1);
+      }
    }
 
    public static boolean isTileWater(int x, int y) {
@@ -1126,21 +1343,42 @@ public class Tilemap {
 
    }
 
+   /**
+    * Renders top-layer tiles that appear above the player and other actors.
+    * These are typically bridge tiles, overhead structures, or decorative elements.
+    * 
+    * RENDERING ORDER:
+    * 1. Tree layer 11 (depth 13)
+    * 2. Top-layer tiles from tileTop hashtable (with viewport culling)
+    * 
+    * VIEWPORT CULLING:
+    * Uses GameScr viewport bounds (gssx, gssy, gssxe, gssye) with 1-tile buffer
+    * to ensure smooth rendering when camera moves.
+    * 
+    * @param g Graphics context for rendering
+    */
    public static final void paintTileTop(mGraphics g) {
-      if (!mSystem.isj2me) {
-         paintTreeLayer(g, trees11, 13);
-         if (tileTop.size() > 0) {
-            Enumeration k = tileTop.keys();
-
-            while(k.hasMoreElements()) {
-               Integer key = (Integer)k.nextElement();
-               TileTop tile = (TileTop)tileTop.get(key);
-               if (tile.y >= GameCanvas.gameScr.gssy && tile.y <= GameCanvas.gameScr.gssye && tile.x >= GameCanvas.gameScr.gssx - 1 && tile.x <= GameCanvas.gameScr.gssxe + 1) {
-                  tile.paint(g);
-               }
+      if (mSystem.isj2me) {
+         return;  // Top tiles not supported on J2ME platform
+      }
+      
+      // Render tree layer 11 first
+      paintTreeLayer(g, trees11, 13);
+      
+      // Render top-layer tiles with viewport culling
+      if (tileTop.size() > 0) {
+         Enumeration k = tileTop.keys();
+         
+         while(k.hasMoreElements()) {
+            Integer key = (Integer)k.nextElement();
+            TileTop tile = (TileTop)tileTop.get(key);
+            
+            // Only render if tile is in or near viewport (1-tile buffer)
+            if (tile.y >= GameCanvas.gameScr.gssy && tile.y <= GameCanvas.gameScr.gssye 
+                && tile.x >= GameCanvas.gameScr.gssx - 1 && tile.x <= GameCanvas.gameScr.gssxe + 1) {
+               tile.paint(g);
             }
          }
-
       }
    }
 

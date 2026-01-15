@@ -101,13 +101,7 @@ public class CharPartInfo {
      * @param frame Animation frame index
      */
     public void paint(mGraphics g, int xp, int yp, int dir, int frame) {
-        // Validate part type
-        if (this.type < 0) {
-            return;
-        }
-        
-        // Validate image loaded
-        if (this.image == null) {
+        if (!isValidForPainting()) {
             return;
         }
         
@@ -152,6 +146,14 @@ public class CharPartInfo {
         }
         
         this.timePaint = System.currentTimeMillis();
+    }
+    
+    /**
+     * Checks if this part is valid and ready for painting.
+     * @return true if part has valid type and loaded image
+     */
+    private boolean isValidForPainting() {
+        return this.type >= 0 && this.image != null;
     }
 
     /**

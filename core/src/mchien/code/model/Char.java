@@ -844,15 +844,25 @@ public class Char extends LiveActor {
             }
             
             // Paint name with shadow
-            mFont.name_Black.drawString(g, displayName, this.x + 1, nameY + 1, 2, false);
-            mFont.name_White.drawString(g, displayName, this.x, nameY, 2, false);
+            paintSimpleName(g, displayName, nameY);
         } catch (NullPointerException e) {
-            // Clan icon or image data not available - continue without icon
-            // Still paint name without clan decoration
+            // Clan icon or image data not available - paint name without clan decoration
             int nameY = this.y - this.yFly - yOffset;
-            mFont.name_Black.drawString(g, this.name, this.x + 1, nameY + 1, 2, false);
-            mFont.name_White.drawString(g, this.name, this.x, nameY, 2, false);
+            paintSimpleName(g, this.name, nameY);
         }
+    }
+    
+    /**
+     * Paints character name with shadow effect (without clan decorations).
+     * Extracted to avoid code duplication.
+     * 
+     * @param g Graphics context
+     * @param name Name to display
+     * @param nameY Y position for name
+     */
+    private void paintSimpleName(mGraphics g, String name, int nameY) {
+        mFont.name_Black.drawString(g, name, this.x + 1, nameY + 1, 2, false);
+        mFont.name_White.drawString(g, name, this.x, nameY, 2, false);
     }
     
     /**

@@ -15,7 +15,7 @@ public class CharacterPartLoader {
      * @param partId The ID of the part to load
      * @param gender The character gender (0 or 1)
      * @param defaultChunks The default chunk array for fallback
-     * @return The loaded Chunk, never null
+     * @return The loaded Chunk, or null if partIndex is invalid
      */
     public static Chunk loadPartWithFallback(int partIndex, short partId, int gender, Chunk[][] defaultChunks) {
         Chunk chunk = null;
@@ -34,9 +34,12 @@ public class CharacterPartLoader {
             case CharacterRenderConstants.PART_WEAPON:
                 chunk = Chunk.getWeapon(partId);
                 break;
+            default:
+                // Invalid part index - fall through to use default
+                break;
         }
         
-        // Fallback to default if loading failed
+        // Fallback to default if loading failed or invalid part index
         if (chunk == null && defaultChunks != null && defaultChunks[gender] != null) {
             chunk = defaultChunks[gender][partIndex];
         }

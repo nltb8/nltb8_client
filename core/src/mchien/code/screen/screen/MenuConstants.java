@@ -46,6 +46,15 @@ public class MenuConstants {
     // Max values
     public static final short MAX_POTION = 999;
     
+    // UI Constants
+    public static final int FOCUS_BLINK_RATE = 4;  // Game ticks per blink
+    public static final int TEXT_Y_OFFSET = 6;     // Text vertical offset in buttons
+    public static final int TEXT_CENTER_ALIGN = 2; // mFont center alignment constant
+    public static final int HEADER_DECORATION_COUNT = 7; // Number of header decorations
+    
+    // Special values
+    public static final int INVALID_POSITION = -1;  // Invalid equipment position
+    
     private MenuConstants() {
         // Utility class - prevent instantiation
     }

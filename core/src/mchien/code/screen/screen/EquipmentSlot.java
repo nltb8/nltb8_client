@@ -25,6 +25,7 @@ public class EquipmentSlot {
     public static final byte POS_PET = 14;
     
     // Mapping array for item types to equipment positions
+    // -1 (INVALID_POSITION) indicates special handling required
     private static final byte[] ITEM_TYPE_TO_POSITION = {
         POS_HAT,    // 0: HAT
         POS_CHAIN,  // 1: CHAIN
@@ -34,7 +35,7 @@ public class EquipmentSlot {
         POS_WEAPON, // 5: WEAPON type 3
         POS_WEAPON, // 6: WEAPON type 4
         POS_WEAPON, // 7: WEAPON type 5
-        -1,         // 8: Special (Body/Shoes based on position)
+        MenuConstants.INVALID_POSITION, // 8: Special (Body/Shoes based on position)
         POS_RING_RIGHT, // 9: RING
         POS_GLOVE,  // 10: GLOVE
         POS_RING_LEFT,  // 11: RING LEFT
@@ -52,11 +53,11 @@ public class EquipmentSlot {
      * 
      * @param itemTemplate Item template to check
      * @param pos Current position (used for special cases)
-     * @return Equipment position or -1 if invalid
+     * @return Equipment position or INVALID_POSITION if invalid
      */
     public static int getEquipmentPosition(ItemTemplate itemTemplate, int pos) {
         if (itemTemplate == null) {
-            return -1;
+            return MenuConstants.INVALID_POSITION;
         }
         
         int type = itemTemplate.type;
@@ -71,7 +72,7 @@ public class EquipmentSlot {
             return ITEM_TYPE_TO_POSITION[type];
         }
         
-        return -1;
+        return MenuConstants.INVALID_POSITION;
     }
     
     /**

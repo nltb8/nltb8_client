@@ -3,73 +3,200 @@ package mchien.code.model;
 import javax.microedition.lcdui.Image;
 import lib.mGraphics;
 
+/**
+ * Contains information and rendering logic for a character body part.
+ * Each part (head, body, leg, weapon, etc.) has its own CharPartInfo instance
+ * with specific image data and positioning information.
+ */
 public class CharPartInfo {
-   public int type;
-   public int id;
-   public int timeRemove = 0;
-   public static int[][][] x;
-   public static int[][][] y;
-   public static int[][][] w;
-   public static int[][][] h;
-   public static int[][][] dx;
-   public static int[][][] dy;
-   public Image image;
-   long timePaint;
-   public int time;
-   public static final byte[][] PART_OF_FRAME = new byte[][]{{0, 0, 1, 2, 3, 4}, {0, 0, 1, 2, 3, 4}, new byte[6], new byte[6], {0, 1, 0, 1, 0, 1}};
-   static int[][] xhd = new int[][]{{1, 1, 0}, {1, 1, 0}};
-   static int[][] yhd = new int[][]{{3, 2, 2}, {3, 2, 2}};
-   static int wFrame = 17;
-   static int[] indexHeadFrame = new int[]{0, 2, 1};
+    /** Type of this part (HEAD, BODY, LEG, WEAPON, etc.) */
+    public int type;
+    
+    /** Unique identifier for this part */
+    public int id;
+    
+    /** Time remaining before this part is removed (for temporary effects) */
+    public int timeRemove = 0;
+    
+    // Static arrays for part rendering data
+    public static int[][][] x;      // X position in sprite sheet
+    public static int[][][] y;      // Y position in sprite sheet
+    public static int[][][] w;      // Width of sprite region
+    public static int[][][] h;      // Height of sprite region
+    public static int[][][] dx;     // X offset when rendering
+    public static int[][][] dy;     // Y offset when rendering
+    
+    /** The sprite image for this part */
+    public Image image;
+    
+    /** Last time this part was painted */
+    long timePaint;
+    
+    /** Animation time counter */
+    public int time;
+    
+    /** Frame mapping for different part types and animations */
+    public static final byte[][] PART_OF_FRAME = new byte[][]{
+        {0, 0, 1, 2, 3, 4},  // Part type 0
+        {0, 0, 1, 2, 3, 4},  // Part type 1
+        new byte[6],         // Part type 2
+        new byte[6],         // Part type 3
+        {0, 1, 0, 1, 0, 1}   // Part type 4
+    };
+    
+    static int[][] xhd = new int[][]{{1, 1, 0}, {1, 1, 0}};
+    static int[][] yhd = new int[][]{{3, 2, 2}, {3, 2, 2}};
+    static int wFrame = 17;
+    static int[] indexHeadFrame = new int[]{0, 2, 1};
 
-   public static void loadDataCharPart() {
-   }
+    /**
+     * Loads character part data from game resources.
+     * Should be called during game initialization.
+     */
+    public static void loadDataCharPart() {
+    }
 
-   public void load(byte[] arr, int type, int Id) {
-   }
+    /**
+     * Loads part data from byte array.
+     * @param arr Raw part data
+     * @param type Part type identifier
+     * @param Id Part ID
+     */
+    public void load(byte[] arr, int type, int Id) {
+    }
 
-   public void loadCoat(int type, int id) {
-   }
+    /**
+     * Loads coat/armor part data.
+     * @param type Coat type
+     * @param id Coat ID
+     */
+    public void loadCoat(int type, int id) {
+    }
 
-   public void load(int type, int id) {
-   }
+    /**
+     * Loads part data by type and ID.
+     * @param type Part type
+     * @param id Part ID
+     */
+    public void load(int type, int id) {
+    }
 
-   public CharPartInfo(int type, int id) {
-      this.type = (short)type;
-      this.id = (short)id;
-   }
+    /**
+     * Creates a new CharPartInfo with the specified type and ID.
+     * @param type Part type (HEAD, BODY, LEG, etc.)
+     * @param id Part ID
+     */
+    public CharPartInfo(int type, int id) {
+        this.type = (short)type;
+        this.id = (short)id;
+    }
 
-   public void paint(mGraphics g, int xp, int yp, int dir, int frame) {
-      if (this.type >= 0) {
-         byte rota = 0;
-         int DIR = dir;
-         if (dir > 2) {
-            rota = 2;
-            DIR = 2;
-         }
-
-         if (this.image != null && (this.type == 1 || this.type == 2 || this.type == 0)) {
+    /**
+     * Paints this character part at the specified position with direction and animation.
+     * 
+     * @param g Graphics context
+     * @param xp X position to paint at
+     * @param yp Y position to paint at
+     * @param dir Character direction (0-3)
+     * @param frame Animation frame index
+     */
+    public void paint(mGraphics g, int xp, int yp, int dir, int frame) {
+        if (this.type < 0 || this.image == null) {
+            return;
+        }
+        
+        // Calculate rotation and direction
+        byte rotation = 0;
+        int normalizedDir = dir;
+        if (dir > 2) {
+            rotation = 2;  // Flip horizontally for right-facing
+            normalizedDir = 2;
+        }
+        
+        // Only paint valid part types
+        if (this.type == 1 || this.type == 2 || this.type == 0) {
             if (this.type != 0) {
-               g.drawRegion(this.image, x[this.type][DIR][PART_OF_FRAME[this.type][frame]], y[this.type][DIR][PART_OF_FRAME[this.type][frame]], w[this.type][DIR][PART_OF_FRAME[this.type][frame]], h[this.type][DIR][PART_OF_FRAME[this.type][frame]], rota, xp + (dir != 3 ? dx[this.type][DIR][frame] : -(dx[this.type][DIR][frame] + w[this.type][DIR][PART_OF_FRAME[this.type][frame]])), yp + dy[this.type][DIR][frame], 0, false);
+                // Non-head parts
+                int frameIndex = PART_OF_FRAME[this.type][frame];
+                int srcX = x[this.type][normalizedDir][frameIndex];
+                int srcY = y[this.type][normalizedDir][frameIndex];
+                int width = w[this.type][normalizedDir][frameIndex];
+                int height = h[this.type][normalizedDir][frameIndex];
+                int offsetX = dx[this.type][normalizedDir][frame];
+                int offsetY = dy[this.type][normalizedDir][frame];
+                
+                // Flip offset for right-facing direction
+                int finalX = xp + (dir != 3 ? offsetX : -(offsetX + width));
+                int finalY = yp + offsetY;
+                
+                g.drawRegion(this.image, srcX, srcY, width, height, rotation, finalX, finalY, 0, false);
             } else {
-               g.drawRegion(this.image, indexHeadFrame[DIR] * wFrame, 0, wFrame, this.image.getHeight(), rota, xp + (dir != 3 ? dx[this.type][DIR][frame] + xhd[0][DIR] : -(dx[this.type][DIR][frame] + xhd[0][DIR] + wFrame)), yp + dy[this.type][DIR][frame] + yhd[0][DIR], 0, false);
+                // Head part - special handling
+                int srcX = indexHeadFrame[normalizedDir] * wFrame;
+                int width = wFrame;
+                int height = this.image.getHeight();
+                int offsetX = dx[this.type][normalizedDir][frame] + xhd[0][normalizedDir];
+                int offsetY = dy[this.type][normalizedDir][frame] + yhd[0][normalizedDir];
+                
+                int finalX = xp + (dir != 3 ? offsetX : -(offsetX + width));
+                int finalY = yp + offsetY;
+                
+                g.drawRegion(this.image, srcX, 0, width, height, rotation, finalX, finalY, 0, false);
             }
-         }
+        }
+        
+        this.timePaint = System.currentTimeMillis();
+    }
 
-         this.timePaint = System.currentTimeMillis();
-      }
-   }
+    /**
+     * Paints this part in a static position (no character animation).
+     * Used for UI displays like inventory or equipment screens.
+     * 
+     * @param g Graphics context
+     * @param xp X position
+     * @param yp Y position
+     * @param dir Direction
+     * @param frame Frame index
+     */
+    public void paintStatic(mGraphics g, short xp, short yp, int dir, int frame) {
+        if (this.image != null) {
+            int frameIndex = PART_OF_FRAME[this.type][frame];
+            g.drawRegion(
+                this.image, 
+                x[this.type][dir][frameIndex], 
+                y[this.type][dir][frameIndex], 
+                w[this.type][dir][frameIndex], 
+                h[this.type][dir][frameIndex], 
+                0, 
+                xp, 
+                yp, 
+                3, 
+                false
+            );
+        }
+    }
 
-   public void paintStatic(mGraphics g, short xp, short yp, int dir, int frame) {
-      if (this.image != null) {
-         g.drawRegion(this.image, x[this.type][dir][PART_OF_FRAME[this.type][frame]], y[this.type][dir][PART_OF_FRAME[this.type][frame]], w[this.type][dir][PART_OF_FRAME[this.type][frame]], h[this.type][dir][PART_OF_FRAME[this.type][frame]], 0, xp, yp, 3, false);
-      }
+    /**
+     * Paints this part as an avatar icon (small portrait).
+     * 
+     * @param g Graphics context
+     * @param xp X position
+     * @param yp Y position
+     * @param frame Frame index
+     */
+    public void paintAvatar(mGraphics g, short xp, short yp, int frame) {
+        // Placeholder for avatar painting
+    }
 
-   }
-
-   public void paintAvatar(mGraphics g, short xp, short yp, int frame) {
-   }
-
-   public void paintImage(mGraphics g, int x, int y) {
-   }
+    /**
+     * Paints just the image without any transformations.
+     * 
+     * @param g Graphics context
+     * @param x X position
+     * @param y Y position
+     */
+    public void paintImage(mGraphics g, int x, int y) {
+        // Placeholder for simple image painting
+    }
 }
+

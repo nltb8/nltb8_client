@@ -795,52 +795,103 @@ public class Char extends LiveActor {
         return (byte) idFrame;
     }
 
+    /**
+     * Paints the character's name above their head.
+     * Refactored for better readability with helper methods.
+     */
     public void paintOtherCharName(mGraphics g) {
-        int ddy = 75;
+        int nameYOffset = CharacterRenderConstants.NAME_Y_OFFSET;
+        
         if (this.isNPC()) {
-            mFont.tahoma_7_black.drawString(g, this.name, this.x + 1, this.y - this.yFly - ddy + 1, 2, false);
-            mFont f = mFont.tahoma_7_yellow;
-            f.drawString(g, this.name, this.x, this.y - this.yFly - ddy, 2, false);
+            paintNpcName(g, nameYOffset);
         } else {
-            String np = this.name;
-            ImageIcon img = null;
-            boolean var5 = false;
-
-            try {
-                if (this.idClan > -1) {
-                    np = np + "[" + this.aliasNameClan + "]";
-                    img = GameData.getImgIcon((short) (this.idIconClan + Res.ID_ICON_CLAN));
-                }
-
-                if (img != null && img.img != null) {
-                    int xx = img.getWidth();
-                    int xicon = this.x - mFont.name_Black.getWidth(np) / 2 - xx - 3;
-                    if (mSystem.isIP) {
-                        xicon -= 2;
-                    }
-
-                    int num = -1;
-                    if (this.chuc_vu_clan == 0) {
-                        num = 15;
-                    } else if (this.chuc_vu_clan == 1) {
-                        num = 8;
-                    } else if (this.chuc_vu_clan == 2) {
-                        num = 6;
-                    }
-
-                    if (num != -1) {
-                        Item.eff_UpLv.paintUpgradeEffect(xicon - 4 + 7, this.y - this.yFly - ddy + 2 + 4, num, 16, g, 1);
-                    }
-
-                    g.drawImage(img.img, xicon - 3, this.y - this.yFly - ddy + (num != -1 ? 1 : 4) - mGraphics.getImageHeight(img.img) / 2 + 4, 0, false);
-                }
-            } catch (Exception var8) {
-            }
-
-            mFont.name_Black.drawString(g, np, this.x + 1, this.y - this.yFly - ddy + 1, 2, false);
-            mFont.name_White.drawString(g, np, this.x, this.y - this.yFly - ddy, 2, false);
+            paintPlayerName(g, nameYOffset);
         }
-
+    }
+    
+    /**
+     * Paints NPC name with shadow effect.
+     */
+    private void paintNpcName(mGraphics g, int yOffset) {
+        int nameY = this.y - this.yFly - yOffset;
+        
+        // Shadow
+        mFont.tahoma_7_black.drawString(g, this.name, this.x + 1, nameY + 1, 2, false);
+        // Name
+        mFont.tahoma_7_yellow.drawString(g, this.name, this.x, nameY, 2, false);
+    }
+    
+    /**
+     * Paints player name with clan icon and effects.
+     */
+    private void paintPlayerName(mGraphics g, int yOffset) {
+        String displayName = this.name;
+        ImageIcon clanIcon = null;
+        
+        try {
+            // Add clan name if applicable
+            if (this.idClan > -1) {
+                displayName = displayName + "[" + this.aliasNameClan + "]";
+                clanIcon = GameData.getImgIcon((short) (this.idIconClan + Res.ID_ICON_CLAN));
+            }
+            
+            int nameY = this.y - this.yFly - yOffset;
+            
+            // Paint clan icon and effects
+            if (clanIcon != null && clanIcon.img != null) {
+                paintClanIcon(g, clanIcon, displayName, nameY);
+            }
+            
+            // Paint name with shadow
+            mFont.name_Black.drawString(g, displayName, this.x + 1, nameY + 1, 2, false);
+            mFont.name_White.drawString(g, displayName, this.x, nameY, 2, false);
+        } catch (Exception e) {
+            // Silently handle icon loading failures
+        }
+    }
+    
+    /**
+     * Paints the clan icon and rank effects next to the name.
+     */
+    private void paintClanIcon(mGraphics g, ImageIcon clanIcon, String displayName, int nameY) {
+        int iconWidth = clanIcon.getWidth();
+        int xIcon = this.x - mFont.name_Black.getWidth(displayName) / 2 - iconWidth - 3;
+        
+        if (mSystem.isIP) {
+            xIcon -= 2;
+        }
+        
+        // Determine rank effect based on clan position
+        int rankEffectId = getClanRankEffectId();
+        
+        if (rankEffectId != -1) {
+            Item.eff_UpLv.paintUpgradeEffect(
+                xIcon - 4 + 7, 
+                nameY + 2 + 4, 
+                rankEffectId, 
+                16, 
+                g, 
+                1
+            );
+        }
+        
+        // Draw clan icon
+        int iconY = nameY + (rankEffectId != -1 ? 1 : 4) - mGraphics.getImageHeight(clanIcon.img) / 2 + 4;
+        g.drawImage(clanIcon.img, xIcon - 3, iconY, 0, false);
+    }
+    
+    /**
+     * Gets the visual effect ID for clan rank.
+     * @return Effect ID, or -1 if no effect
+     */
+    private int getClanRankEffectId() {
+        // BANG_CHU = 0, PHO_BANG_CHU = 1, TRUONG_LAO = 2
+        switch (this.chuc_vu_clan) {
+            case 0: return 15;  // BANG_CHU (Leader)
+            case 1: return 8;   // PHO_BANG_CHU (Vice Leader)
+            case 2: return 6;   // TRUONG_LAO (Elder)
+            default: return -1; // THANH_VIEN (Member) - no effect
+        }
     }
 
     public void paintCharAvatar(mGraphics g, int x, int y, int idPartHair, int gender) {

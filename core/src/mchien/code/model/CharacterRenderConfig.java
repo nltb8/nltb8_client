@@ -60,6 +60,10 @@ public class CharacterRenderConfig {
     
     /**
      * Creates a default configuration for normal gameplay rendering.
+     * This provides sensible defaults for typical in-game character rendering.
+     * For custom configurations, use newBuilder() to create a customized config.
+     * 
+     * @return CharacterRenderConfig with all features enabled
      */
     public static CharacterRenderConfig createDefault() {
         return newBuilder()
@@ -71,6 +75,10 @@ public class CharacterRenderConfig {
     
     /**
      * Creates a configuration for preview/shop rendering.
+     * Disables heavy effects and mounts for cleaner UI display.
+     * For custom configurations, use newBuilder() to create a customized config.
+     * 
+     * @return CharacterRenderConfig optimized for UI previews
      */
     public static CharacterRenderConfig createPreview() {
         return newBuilder()

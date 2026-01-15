@@ -823,6 +823,7 @@ public class Char extends LiveActor {
     
     /**
      * Paints player name with clan icon and effects.
+     * Note: Icon loading failures are caught and ignored as they're non-critical for gameplay.
      */
     private void paintPlayerName(mGraphics g, int yOffset) {
         String displayName = this.name;
@@ -845,8 +846,12 @@ public class Char extends LiveActor {
             // Paint name with shadow
             mFont.name_Black.drawString(g, displayName, this.x + 1, nameY + 1, 2, false);
             mFont.name_White.drawString(g, displayName, this.x, nameY, 2, false);
-        } catch (Exception e) {
-            // Silently handle icon loading failures
+        } catch (NullPointerException e) {
+            // Clan icon or image data not available - continue without icon
+            // Still paint name without clan decoration
+            int nameY = this.y - this.yFly - yOffset;
+            mFont.name_Black.drawString(g, this.name, this.x + 1, nameY + 1, 2, false);
+            mFont.name_White.drawString(g, this.name, this.x, nameY, 2, false);
         }
     }
     

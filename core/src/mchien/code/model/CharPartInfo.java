@@ -101,7 +101,13 @@ public class CharPartInfo {
      * @param frame Animation frame index
      */
     public void paint(mGraphics g, int xp, int yp, int dir, int frame) {
-        if (this.type < 0 || this.image == null) {
+        // Validate part type
+        if (this.type < 0) {
+            return;
+        }
+        
+        // Validate image loaded
+        if (this.image == null) {
             return;
         }
         

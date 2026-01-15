@@ -1,0 +1,17 @@
+{
+  "platform": "windows64",
+  "jdk": "D:\NLTB\Client_NLTB8\jre",
+  "executable": "QTAH",
+  "classpath": [
+    "desktop/build/libs/desktop-1.0.jar"
+  ],
+  "mainclass": "D:\NLTB\Client_NLTB8\desktop\src\com\mchien\ngulong\desktop\DesktopLauncher.java",
+  "vmargs": [
+    "-Xms256m",
+    "-Xmx1024m"
+  ],
+  "resources": [
+    "assets"
+  ],
+  "output": "out/win"
+}

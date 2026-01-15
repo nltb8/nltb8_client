@@ -12,7 +12,7 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.backgroundFPS = 27;
 		config.foregroundFPS = 27;
-		config.title = "Ngũ Long Tranh Bá";
+		config.title = "Quy Tụ Anh Hùng";
 		config.resizable = false;
 
 //		config.addIcon("icon/iconapp16x16.png", Files.FileType.Internal);
@@ -22,7 +22,7 @@ public class DesktopLauncher {
 
 		config.addIcon("icon/icon32_1.png", Files.FileType.Internal);
 		config.addIcon("icon/icon128_1.png", Files.FileType.Internal);
-		new LwjglApplication(MyGdxGame.gI(), config);
+		LwjglApplication app = new LwjglApplication(MyGdxGame.gI(), config);
 		TCanvas.ScreenSize = Rms.LoadScreenSize();
 		if (TCanvas.ScreenSize == 1) {
 			config.width = 400;

@@ -76,7 +76,7 @@ public class Rms {
       byte[] data = null;
 
       try {
-         FileHandle file = Gdx.files.local("rms/" + filename);
+         FileHandle file = Gdx.files.external("rms/" + filename);
          data = file.readBytes();
       } catch (Exception var3) {
       }

@@ -148,7 +148,30 @@ implements IActionListener {
             e.printStackTrace();
         }
     }
+    public void onVongQuayResult(Message msg) {
+        try {
+            byte status = msg.reader().readByte();
+            if (status == 1) {
+                short idIcon = msg.reader().readShort();
+                int quantity = msg.reader().readInt();
 
+                // ✅ đẩy kết quả sang Vòng Quay
+                mchien.code.screen.screen.vongquay.VongQuayScr.gI()
+                        .onResult((byte) 3, idIcon, (short) quantity);
+
+                mSystem.println("Add Item Succes");
+            } else {
+                String reason = msg.reader().readUTF();
+                mSystem.println(reason);
+                // dừng quay nếu lỗi
+//                mchien.code.screen.screen.vongquay.VongQuayScr.gI().forceStop();
+            }
+        }catch (Exception e) {
+            mSystem.println("loi ham add npc " + e.toString());
+            e.printStackTrace();
+        }
+
+    }
     public void onMenu_Option(Message msg) {
         try {
             byte typemenu = msg.reader().readByte();

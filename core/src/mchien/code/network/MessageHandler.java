@@ -124,6 +124,9 @@ public class MessageHandler extends Cmd_message implements IMessageHandler, IAct
                 case 122: // BAUCUA_START_GAME
                     // Các message này chỉ gửi lên server, response sẽ qua ROOM_INFO hoặc GAME_STATE
                     break;
+                case 124:
+                    GameCanvas.readMessenge.onVongQuayResult(msg);
+                    break;
                 case -32:
                     GameCanvas.readMessenge.onPopupServer(msg);
                     break;

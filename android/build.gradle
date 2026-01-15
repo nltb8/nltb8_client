@@ -1,12 +1,12 @@
 android {
-//    signingConfigs {
-//        debug {
-//            storeFile file('C:\\Users\\khiem\\Desktop\\keytool.jks')
-//            storePassword '12345678'
-//            keyAlias 'admin'
-//            keyPassword '12345678'
-//        }
-//    }
+    //signingConfigs {
+    //    debug {
+    //        storeFile file('C:\\Users\\khiem\\Desktop\\keytool.jks')
+    //        storePassword '12345678'
+    //        keyAlias 'admin'
+    //        keyPassword '12345678'
+    //    }
+    //}
     namespace "com.nltb.khach1"
     buildToolsVersion "35.0.0"
     compileSdkVersion 34

@@ -30,9 +30,9 @@ public class ServerListScr extends ScreenTeam implements IActionListener {
    public static int cmyLim;
    public static int index;
    public static String currentNameServer = "";
-   public static String[] nameServer = new String[]{"test", "test", "test", "test"};
-   public static String[] address = new String[]{"192.168.1.90", "192.168.1.90", "192.168.1.90", "192.168.1.90"};
-   public static short[] port = new short[]{19155, 19155, 19155, 19155};
+   public static String[] nameServer = new String[]{"Local"};
+   public static String[] address = new String[]{"localhost"};
+   public static short[] port = new short[]{19129};
    public static final String linkGetHost = "http://teamobi.com/srvips/NQSH2.txt";
    public static String addressSave = null;
    public static short portSave = -1;

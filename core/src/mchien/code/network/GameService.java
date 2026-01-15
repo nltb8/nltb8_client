@@ -65,7 +65,13 @@ public class GameService extends Cmd_message {
         }
 
     }
-
+    public void requestSpin(int count) {
+        try {
+            Message m = this.init((byte) 123);
+            session.sendMessage(m);
+            m.cleanup();
+        } catch (Exception e) {}
+    }
     public void buyItem(int idItem, int idSeller, int catSeller, int itemcat, int num) {
         Message msg = this.init((byte) 24);
 

@@ -25,20 +25,6 @@ import mchien.code.screen.Util;
 import mchien.code.screen.Utils;
 import mchien.code.screen.event.EventScreen;
 import mchien.code.screen.event.MainEvent;
-import mchien.code.screen.screen.ChangScr;
-import mchien.code.screen.screen.CharSelectScr;
-import mchien.code.screen.screen.FontTeam;
-import mchien.code.screen.screen.GameData;
-import mchien.code.screen.screen.InfoOtherCharScr;
-import mchien.code.screen.screen.Location;
-import mchien.code.screen.screen.MainMenu;
-import mchien.code.screen.screen.MessageScr;
-import mchien.code.screen.screen.ScreenClan;
-import mchien.code.screen.screen.ScreenTeam;
-import mchien.code.screen.screen.ServerListScr;
-import mchien.code.screen.screen.SetInfoData;
-import mchien.code.screen.screen.ShopHairScreen;
-import mchien.code.screen.screen.ShowinfoItem;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -60,6 +46,7 @@ import lib.mVector;
 import lib2.Message;
 import lib2.TField;
 import lib2.mFont;
+import mchien.code.screen.screen.vongquay.VongQuayScr;
 
 public class GameScr
         extends ScreenTeam
@@ -343,6 +330,7 @@ public class GameScr
     public mCommand cmdchat;
     public mcCmd cmdAuto;
     public mcCmd cmdGoiNap;
+    public mcCmd cmdVongQuay;
     public mCommand cmdChangeFocus;
     public mCommand cmdCloseChat;
     public mCommand cmdDochat;
@@ -1642,6 +1630,13 @@ public class GameScr
         this.cmdAuto.setImgSelect("/hd/menu/auto_1.png");
         this.cmdAuto.setXYWH(10, 40, 34, 34);
 
+        this.cmdVongQuay = new mcCmd("", this, 112); // chọn action id chưa dùng
+        this.cmdVongQuay.setImgBase("/hd/menu/spin_0.png");
+        this.cmdVongQuay.setImgSelect("/hd/menu/spin_1.png");
+
+//         đặt cạnh nút mqt: lệch sang phải đúng bằng width + khoảng cách
+        this.cmdVongQuay.setXYWH(50 + 34 + 4, 43, 34, 34); // +4 là khoảng hở
+
         this.cmdChangeFocus = new mCommand("", this, 7);
         this.cmdChangeFocus.setindexImage(6);
         this.cmdChangeFocus.setXY(GameCanvas.w - 8 - this.cmdChangeFocus.wCmd + 2, GameCanvas.h - 145);
@@ -2136,7 +2131,7 @@ public class GameScr
                 this.isDis = true;
                 this.onDisconnect("gamescr");
             }
-            this.updateClound();
+            this. updateClound();
             if (this.tickHP >= 0) {
                 --this.tickHP;
             }
@@ -2178,6 +2173,9 @@ public class GameScr
 
                 if (cmdGoiNap != null) {
                     cmdGoiNap.update();
+                }
+                if (cmdVongQuay != null) {
+                    cmdVongQuay.update();
                 }
             }
             if (isIntro) {
@@ -4015,6 +4013,9 @@ public class GameScr
 
             if (this.cmdGoiNap != null)
                 this.cmdGoiNap.paint(g);
+
+            if (this.cmdVongQuay != null)
+                this.cmdVongQuay.paint(g);
         }
 
     }
@@ -6108,6 +6109,11 @@ public class GameScr
                 GameCanvas.menuSelectitem.startAt();
                 GameCanvas.menuSelectitem.perform(6, null);
                 break;
+            case 112:
+                // mở UI vòng quay
+                VongQuayScr.gI().switchToMe(this);
+                break;
+
         }
     }
 

@@ -116,8 +116,6 @@ public class DataSkillEff extends Effect {
    public long timelive;
    private long lasttime;
 
-   private int frameCounter637 = 0;
-
    public DataSkillEff() {
    }
 
@@ -1923,101 +1921,90 @@ public class DataSkillEff extends Effect {
 
             if (eff.listFrame.size() > 0) {
                try {
-                  boolean shouldUpdateFrame = true;
-//                  if (this.idEff == 637) {
-//                     ++this.frameCounter637;
-//                     if (this.frameCounter637 >= 2) {
-//                        this.frameCounter637 = 0;
-//                        shouldUpdateFrame = false;
-//                     }
-//                  }
+                  switch(this.typeupdate) {
+                  case 0:
+                     ++this.f;
+                     if (this.idEff == 11 && this.f == 15) {
+                        EffectSkill.createLowEfect(this.x, this.y + 20, 55);
+                        GameScr.timeVibrateScreen = Res.random(1, 5);
+                     }
 
-                  if (shouldUpdateFrame) {
-                     switch(this.typeupdate) {
-                     case 0:
-                        ++this.f;
-                        if (this.idEff == 11 && this.f == 15) {
-                           EffectSkill.createLowEfect(this.x, this.y + 20, 55);
+                     if (this.idEff == 394 && this.f == 10) {
+                        for(int i = 0; i < 3; ++i) {
+                           Effect_Sao_chop ef = new Effect_Sao_chop(this.x, this.y, 24);
+                           EffectManager.addHiEffect(ef);
+                        }
+                     }
+
+                     if (this.f > eff.sequence.length) {
+                        if (!this.canremove) {
+                           this.wantDestroy = true;
+                        }
+
+                        this.f = 0;
+                        if (this.idEff == 63) {
                            GameScr.timeVibrateScreen = Res.random(1, 5);
                         }
 
-                        if (this.idEff == 394 && this.f == 10) {
-                           for(int i = 0; i < 3; ++i) {
-                              Effect_Sao_chop ef = new Effect_Sao_chop(this.x, this.y, 24);
-                              EffectManager.addHiEffect(ef);
-                           }
+                        if (this.mychar != null && !this.mychar.canPaint_) {
+                           this.mychar.setCanPaint(true);
                         }
+                     }
 
-                        if (this.f > eff.sequence.length) {
-                           if (!this.canremove) {
-                              this.wantDestroy = true;
-                           }
+                     this.Frame = eff.sequence[this.f];
+                     break;
+                  case 1:
+                     ++this.f;
+                     if (this.f > eff.sequence.length) {
+                        this.f = 0;
+                        this.wantDestroy = true;
+                     }
 
-                           this.f = 0;
-                           if (this.idEff == 63) {
-                              GameScr.timeVibrateScreen = Res.random(1, 5);
-                           }
-
-                           if (this.mychar != null && !this.mychar.canPaint_) {
-                              this.mychar.setCanPaint(true);
-                           }
-                        }
-
-                        this.Frame = eff.sequence[this.f];
-                        break;
-                     case 1:
-                        ++this.f;
-                        if (this.f > eff.sequence.length) {
-                           this.f = 0;
-                           this.wantDestroy = true;
-                        }
-
-                        this.Frame = eff.sequence[this.f];
-                        break;
-                     case 2:
-                        ++this.f;
-                        if (this.f > eff.sequence.length) {
-                           if (this.loop == 0) {
-                              this.f = (byte)(eff.sequence.length - 1);
-                           } else if (this.waitLoop > 0) {
-                              if (mSystem.currentTimeMillis() - this.lasttime > (long)(this.waitLoop * 1000)) {
-                                 this.f = 0;
-                                 this.lasttime = mSystem.currentTimeMillis();
-                              }
-                           } else {
+                     this.Frame = eff.sequence[this.f];
+                     break;
+                  case 2:
+                     ++this.f;
+                     if (this.f > eff.sequence.length) {
+                        if (this.loop == 0) {
+                           this.f = (byte)(eff.sequence.length - 1);
+                        } else if (this.waitLoop > 0) {
+                           if (mSystem.currentTimeMillis() - this.lasttime > (long)(this.waitLoop * 1000)) {
                               this.f = 0;
+                              this.lasttime = mSystem.currentTimeMillis();
                            }
+                        } else {
+                           this.f = 0;
                         }
+                     }
 
-                        if (this.timelive - mSystem.currentTimeMillis() < 0L) {
-                           this.wantDestroy = true;
-                        }
+                     if (this.timelive - mSystem.currentTimeMillis() < 0L) {
+                        this.wantDestroy = true;
+                     }
 
-                        if (this.f < eff.sequence.length) {
-                           this.Frame = eff.sequence[this.f];
-                        }
-                        break;
-                     case 3:
-                        if (this.idSound != -1 && this.idSound > 0 && this.TimeLoopSound - mSystem.currentTimeMillis() <= 0L) {
-                           mSound.playSound(this.idSound, mSound.volumeSound);
-                           this.TimeLoopSound = mSystem.currentTimeMillis() + (long)(this.timeWaitSound * 1000);
-                        }
+                     if (this.f < eff.sequence.length) {
+                        this.Frame = eff.sequence[this.f];
+                     }
+                     break;
+                  case 3:
+                     if (this.idSound != -1 && this.idSound > 0 && this.TimeLoopSound - mSystem.currentTimeMillis() <= 0L) {
+                        mSound.playSound(this.idSound, mSound.volumeSound);
+                        this.TimeLoopSound = mSystem.currentTimeMillis() + (long)(this.timeWaitSound * 1000);
+                     }
 
-                        ++this.f;
-                        if (this.f > eff.sequence.length) {
-                           if (this.waitLoop > 0) {
-                              if (mSystem.currentTimeMillis() - this.lasttime > (long)(this.waitLoop * 1000)) {
-                                 this.f = 0;
-                                 this.lasttime = mSystem.currentTimeMillis();
-                              }
-                           } else {
+                     ++this.f;
+                     if (this.f > eff.sequence.length) {
+                        if (this.waitLoop > 0) {
+                           if (mSystem.currentTimeMillis() - this.lasttime > (long)(this.waitLoop * 1000)) {
                               this.f = 0;
+                              this.lasttime = mSystem.currentTimeMillis();
                            }
+                        } else {
+                           this.f = 0;
                         }
+                     }
 
-                        if (this.f < eff.sequence.length) {
-                           this.Frame = eff.sequence[this.f];
-                        }
+                     if (this.f < eff.sequence.length) {
+                        this.Frame = eff.sequence[this.f];
                      }
                   }
                } catch (Exception var4) {

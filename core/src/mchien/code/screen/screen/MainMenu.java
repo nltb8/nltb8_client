@@ -308,7 +308,7 @@ public class MainMenu
     mCommand cmdSelectItem;
     String[] tile;
     mVector infochar;
-    public boolean isShowText;
+    private boolean isShowText;
     private boolean isUseCmr;
     private boolean isSetXYCmdSelect;
     private boolean isPaintMoney;
@@ -7105,20 +7105,20 @@ public class MainMenu
                     return;
                 }
             }
-            if (item.quantity > 1) {
-                // if (GameCanvas.inputDlg.tfInput == null)
-                // GameCanvas.inputDlg.tfInput = new TField();
-                // GameCanvas.inputDlg.setInfo("Nhập số lượng muốn sử dụng", new mCommand("Ok",
-                // this, 2704), 1, 10, true);
-                // GameCanvas.inputDlg.show();
-                // GameCanvas.gameScr.hideGUI = 0;
-
-                GameCanvas.inputDlg.setInfo(new String[] { "Nhập số lượng muốn sử dụng" }, "OK", new byte[] { 0 }, 100,
-                        false, 0, 2704, "Số lượng", "");
-                GameCanvas.inputDlg.show();
-                GameCanvas.gameScr.hideGUI = 0;
-                return;
-            }
+//            if (item.quantity > 1) {
+//                // if (GameCanvas.inputDlg.tfInput == null)
+//                // GameCanvas.inputDlg.tfInput = new TField();
+//                // GameCanvas.inputDlg.setInfo("Nhập số lượng muốn sử dụng", new mCommand("Ok",
+//                // this, 2704), 1, 10, true);
+//                // GameCanvas.inputDlg.show();
+//                // GameCanvas.gameScr.hideGUI = 0;
+//
+//                GameCanvas.inputDlg.setInfo(new String[] { "Nhập số lượng muốn sử dụng" }, "OK", new byte[] { 0 }, 100,
+//                        false, 0, 2704, "Số lượng", "");
+//                GameCanvas.inputDlg.show();
+//                GameCanvas.gameScr.hideGUI = 0;
+//                return;
+//            }
 
             GameService.gI().useItem(item.ID);
         }

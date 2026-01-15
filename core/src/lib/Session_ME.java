@@ -179,8 +179,8 @@ public class Session_ME implements ISession {
    }
 
    public void connect(String host, String port) {
-      host="127.0.0.1";
-      port="19129";
+//      host="127.0.0.1";
+//      port="19129";
       if (!this.connected && !this.connecting) {
          this.getKeyComplete = false;
          this.sc = null;

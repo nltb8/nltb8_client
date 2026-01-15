@@ -10,8 +10,9 @@ import mchien.code.screen.screen.GameScr;
 public class loadIP {
     public static void load(){
         try{
-            String text = HttpClient.get("http://data.nltb9.com/serverlist.txt");
+            String text = HttpClient.get("http://data.quytuanhhung.com/serverlist.txt");
             loadIP(text);
+//            loadIP("Máy chủ 1:sv1.ngulongplus.com:19129\nLocal:127.0.0.1:19129\nLocal2:192.168.1.137:19129");
         }catch (Exception e){
             loadIP("Máy chủ 1:sv1.ngulongplus.com:19129\nLocal:127.0.0.1:19129\nLocal2:192.168.1.137:19129");
         }

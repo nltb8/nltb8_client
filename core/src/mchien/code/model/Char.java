@@ -659,41 +659,41 @@ public class Char extends LiveActor {
         if (!shouldPaintShadow()) {
             return;
         }
-        
+
         // Handle flying characters separately
         if (this.isPhiHanh) {
             paintFlyingShadow(g);
             return;
         }
-        
+
         // Calculate shadow offset and paint
         int xs = calculateShadowXOffset();
         int ys = calculateShadowYOffset();
-        
+
         DataSkillEff partThuCuoi = Char.loadPartPhiPhongThuCuoi(this.idHorse);
         Image shadow = this.getShadow();
-        
+
         if (shadow != null) {
             int xsd = this.x + xs;
             int ysd = this.y + CharacterRenderConstants.SHADOW_Y_OFFSET + ys;
-            
+
             // Adjust for mount
             if (partThuCuoi != null) {
                 xsd = this.x;
                 ysd = this.y + CharacterRenderConstants.MOUNT_DY_DEFAULT;
             }
-            
+
             g.drawImage(shadow, xsd, ysd, mGraphics.VCENTER | mGraphics.HCENTER, false);
         }
     }
-    
+
     /**
      * Determines if shadow should be painted.
      */
     private boolean shouldPaintShadow() {
         return !this.isWater && this.canPaint();
     }
-    
+
     /**
      * Paints shadow for flying characters.
      */
@@ -703,13 +703,13 @@ public class Char extends LiveActor {
             g.drawImage(shadow, this.x, this.y + CharacterRenderConstants.SHADOW_Y_OFFSET, 3, false);
         }
     }
-    
+
     /**
      * Calculates X offset for shadow based on character state and direction.
      */
     private int calculateShadowXOffset() {
         int xs = 0;
-        
+
         // Standing state offsets
         if (this.state == A_STAND) {
             if (this.dir == LEFT) xs = -1;
@@ -717,14 +717,14 @@ public class Char extends LiveActor {
             // DOWN and RIGHT remain 0
             return xs;
         }
-        
+
         // Moving/attacking state offsets
-        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK || 
-                                       this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
-        
+        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK ||
+                this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
+
         if (isMovingOrAttacking) {
             boolean isAttacking = (this.state == A_ATTACK || this.state == A_RUN_FRAME_ATTACK);
-            
+
             if (this.dir == LEFT) {
                 xs = isAttacking ? 0 : 10;
             } else if (this.dir == RIGHT) {
@@ -735,16 +735,16 @@ public class Char extends LiveActor {
                 xs = 4;
             }
         }
-        
+
         return xs;
     }
-    
+
     /**
      * Calculates Y offset for shadow based on character state and direction.
      */
     private int calculateShadowYOffset() {
         int ys = 0;
-        
+
         // Standing state offsets
         if (this.state == A_STAND) {
             if (this.dir == UP) ys = 0;
@@ -752,12 +752,12 @@ public class Char extends LiveActor {
             else ys = -1; // DOWN
             return ys;
         }
-        
+
         // Moving/attacking state offsets
-        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK || 
-                                       this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
+        boolean isMovingOrAttacking = (this.state == A_RUN || this.state == RUN_AND_ATTACK ||
+                this.state == A_RUN_FRAME_ATTACK || this.state == A_ATTACK);
         boolean isAttacking = (this.state == A_ATTACK || this.state == A_RUN_FRAME_ATTACK);
-        
+
         if (isMovingOrAttacking) {
             if (this.dir == DOWN && isAttacking) {
                 ys = -1;
@@ -766,7 +766,7 @@ public class Char extends LiveActor {
             }
             // Other cases remain 0
         }
-        
+
         return ys;
     }
 
@@ -775,11 +775,7 @@ public class Char extends LiveActor {
         if (this.state == 0) {
             return GameScr.imgShadow[1];
         } else if (this.state != 1 && this.state != 6 && this.state != 7 || this.dir != 2 && this.dir != 3) {
-            if ((this.state == 1 || this.state == 6 || this.state == 7) && (this.dir == 2 || this.dir == 3)) {
-                return GameScr.imgShadow[0];
-            } else {
-                return this.state != 1 && this.state != 6 && this.state != 7 || this.dir != 1 && this.dir != 0 ? img : GameScr.imgShadow[2];
-            }
+            return this.state != 1 && this.state != 6 && this.state != 7 || this.dir != 1 && this.dir != 0 ? img : GameScr.imgShadow[2];
         } else {
             return GameScr.imgShadow[0];
         }
@@ -801,26 +797,26 @@ public class Char extends LiveActor {
      */
     public void paintOtherCharName(mGraphics g) {
         int nameYOffset = CharacterRenderConstants.NAME_Y_OFFSET;
-        
+
         if (this.isNPC()) {
             paintNpcName(g, nameYOffset);
         } else {
             paintPlayerName(g, nameYOffset);
         }
     }
-    
+
     /**
      * Paints NPC name with shadow effect.
      */
     private void paintNpcName(mGraphics g, int yOffset) {
         int nameY = this.y - this.yFly - yOffset;
-        
+
         // Shadow
         mFont.tahoma_7_black.drawString(g, this.name, this.x + 1, nameY + 1, 2, false);
         // Name
         mFont.tahoma_7_yellow.drawString(g, this.name, this.x, nameY, 2, false);
     }
-    
+
     /**
      * Paints player name with clan icon and effects.
      * Note: Icon loading failures are caught and ignored as they're non-critical for gameplay.
@@ -828,21 +824,21 @@ public class Char extends LiveActor {
     private void paintPlayerName(mGraphics g, int yOffset) {
         String displayName = this.name;
         ImageIcon clanIcon = null;
-        
+
         try {
             // Add clan name if applicable
             if (this.idClan > -1) {
                 displayName = displayName + "[" + this.aliasNameClan + "]";
                 clanIcon = GameData.getImgIcon((short) (this.idIconClan + Res.ID_ICON_CLAN));
             }
-            
+
             int nameY = this.y - this.yFly - yOffset;
-            
+
             // Paint clan icon and effects
             if (clanIcon != null && clanIcon.img != null) {
                 paintClanIcon(g, clanIcon, displayName, nameY);
             }
-            
+
             // Paint name with shadow
             paintSimpleName(g, displayName, nameY);
         } catch (NullPointerException e) {
@@ -851,7 +847,7 @@ public class Char extends LiveActor {
             paintSimpleName(g, this.name, nameY);
         }
     }
-    
+
     /**
      * Paints character name with shadow effect (without clan decorations).
      * Extracted to avoid code duplication.
@@ -871,41 +867,46 @@ public class Char extends LiveActor {
     private void paintClanIcon(mGraphics g, ImageIcon clanIcon, String displayName, int nameY) {
         int iconWidth = clanIcon.getWidth();
         int xIcon = this.x - mFont.name_Black.getWidth(displayName) / 2 - iconWidth - 3;
-        
+
         if (mSystem.isIP) {
             xIcon -= 2;
         }
-        
+
         // Determine rank effect based on clan position
         int rankEffectId = getClanRankEffectId();
-        
+
         if (rankEffectId != -1) {
             Item.eff_UpLv.paintUpgradeEffect(
-                xIcon - 4 + 7, 
-                nameY + 2 + 4, 
-                rankEffectId, 
-                16, 
-                g, 
-                1
+                    xIcon - 4 + 7,
+                    nameY + 2 + 4,
+                    rankEffectId,
+                    16,
+                    g,
+                    1
             );
         }
-        
+
         // Draw clan icon
         int iconY = nameY + (rankEffectId != -1 ? 1 : 4) - mGraphics.getImageHeight(clanIcon.img) / 2 + 4;
         g.drawImage(clanIcon.img, xIcon - 3, iconY, 0, false);
     }
-    
+
     /**
      * Gets the visual effect ID for clan rank.
+     *
      * @return Effect ID, or -1 if no effect
      */
     private int getClanRankEffectId() {
         // BANG_CHU = 0, PHO_BANG_CHU = 1, TRUONG_LAO = 2
         switch (this.chuc_vu_clan) {
-            case 0: return 15;  // BANG_CHU (Leader)
-            case 1: return 8;   // PHO_BANG_CHU (Vice Leader)
-            case 2: return 6;   // TRUONG_LAO (Elder)
-            default: return -1; // THANH_VIEN (Member) - no effect
+            case 0:
+                return 15;  // BANG_CHU (Leader)
+            case 1:
+                return 8;   // PHO_BANG_CHU (Vice Leader)
+            case 2:
+                return 6;   // TRUONG_LAO (Elder)
+            default:
+                return -1; // THANH_VIEN (Member) - no effect
         }
     }
 
@@ -1085,19 +1086,24 @@ public class Char extends LiveActor {
 
     /**
      * Gets the quest state for this character (NPCs only).
+     *
      * @return Quest state: 0=new quest available, 1=quest complete, 2=quest in progress, -1=no quest
      */
     public int getStateQuest() {
         if (!this.isNPC()) {
             return -1;
         }
-        
+
         int state = GameScr.getIdImgQuest(this.idBot);
         switch (state) {
-            case 0: return 0;  // New quest
-            case 1: return 2;  // Quest in progress
-            case 2: return 1;  // Quest complete
-            default: return -1;
+            case 0:
+                return 0;  // New quest
+            case 1:
+                return 2;  // Quest in progress
+            case 2:
+                return 1;  // Quest complete
+            default:
+                return -1;
         }
     }
 
@@ -1121,6 +1127,7 @@ public class Char extends LiveActor {
 
     /**
      * Gets the character's gender based on class.
+     *
      * @return 0 for male (Thieu Lam, Cai Bang, Vo Dang), 1 for female (Nga Mi, Ngu Doc)
      */
     public int getGender() {
@@ -1655,7 +1662,7 @@ public class Char extends LiveActor {
         for (int i = 0; i < ORDER_PAINT[frame].length; ++i) {
             if (i < chunks.size()) {
                 chunk = (Chunk) chunks.elementAt(ORDER_PAINT[frame][i]);
-                if(chunk == null)
+                if (chunk == null)
                     continue;
                 dx = 0;
                 dy = 0;
@@ -2367,15 +2374,15 @@ public class Char extends LiveActor {
     /**
      * Sets character parts for shop/preview rendering.
      * Simplified using CharacterPartLoader.
-     * 
+     *
      * @param listPart Array of part IDs [HEAD, BODY, LEG, WEAPON]
      */
     public void setInfoWearingShopModel(short[] listPart) {
         this.partShopPaint.removeAllElements();
-        
+
         // Use CharacterPartLoader to create part vector
         mVector parts = CharacterPartLoader.createPartVector(listPart, this.getGender());
-        
+
         // Copy parts to partShopPaint
         for (int i = 0; i < parts.size(); i++) {
             this.partShopPaint.addElement(parts.elementAt(i));
@@ -2385,27 +2392,25 @@ public class Char extends LiveActor {
     /**
      * Sets the character's wearing/equipment parts for rendering.
      * Simplified using CharacterPartLoader for better maintainability.
-     * 
+     *
      * @param listPart Array of part IDs [HEAD, BODY, LEG, WEAPON]
      */
     public void setInfoWearing(short[] listPart) {
         this.partPaint.removeAllElements();
         this.myListPart = listPart;
-        
+
         // Skip loading for non-main characters when other char painting is disabled
         if (!this.isMainChar() && !this.isNPC() && !paintOrtherChar) {
             return;
         }
-        
+
         // Use CharacterPartLoader to create part vector
         mVector parts = CharacterPartLoader.createPartVector(listPart, this.getGender());
-        
+
         // Copy parts to partPaint
         for (int i = 0; i < parts.size(); i++) {
             this.partPaint.addElement(parts.elementAt(i));
         }
-        }
-
     }
 
     public void setInfoEffPhatsang(short[] listphatSang) {

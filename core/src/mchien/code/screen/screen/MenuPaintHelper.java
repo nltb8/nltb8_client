@@ -51,7 +51,8 @@ public class MenuPaintHelper {
         g.setColor(MenuColors.BORDER_DARK);
         g.drawLine(x + 3, y + 3 + height - 6 + 1, x + width - 6, y + 3 + height - 6 + 1, false);
         
-        if (isFocused && GameCanvas.gameTick / 4 % 4 != 0) {
+        // Check focus with blink rate from constants
+        if (isFocused && GameCanvas.gameTick / MenuConstants.FOCUS_BLINK_RATE % 4 != 0) {
             g.setColor(MenuColors.BACKGROUND_FOCUSED);
         } else {
             g.setColor(MenuColors.BACKGROUND_LIGHT);

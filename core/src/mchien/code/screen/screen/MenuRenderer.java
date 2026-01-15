@@ -37,9 +37,11 @@ public class MenuRenderer {
         int textY = y + height / 2;
         
         if (isSelected) {
-            FontTeam.fontTile.drawString(g, caption, textX, textY - 6, 2, false);
+            FontTeam.fontTile.drawString(g, caption, textX, textY - MenuConstants.TEXT_Y_OFFSET, 
+                                        MenuConstants.TEXT_CENTER_ALIGN, false);
         } else {
-            mFont.tahoma_7b_white.drawString(g, caption, textX, textY - 6, 2, false);
+            mFont.tahoma_7b_white.drawString(g, caption, textX, textY - MenuConstants.TEXT_Y_OFFSET, 
+                                             MenuConstants.TEXT_CENTER_ALIGN, false);
         }
     }
     
@@ -62,9 +64,9 @@ public class MenuRenderer {
             g.drawRect(x + i, y - 28 + i, width - i * 2, 28 - i * 2, false);
         }
         
-        // Draw title decorations
+        // Draw title decorations using constant
         int centerX = x + width / 2;
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < MenuConstants.HEADER_DECORATION_COUNT; i++) {
             g.drawRegion(GameScr.imgBoder[5], 0, 25, 12, 25, 0, 
                         centerX - 42 + i * 12, y - 14, 
                         mGraphics.VCENTER | mGraphics.LEFT, false);
@@ -79,7 +81,7 @@ public class MenuRenderer {
                     mGraphics.VCENTER | mGraphics.RIGHT, false);
         
         // Draw title text
-        FontTeam.fontTile.drawString(g, title, centerX, y - 19, 2, false);
+        FontTeam.fontTile.drawString(g, title, centerX, y - 19, MenuConstants.TEXT_CENTER_ALIGN, false);
     }
     
     /**

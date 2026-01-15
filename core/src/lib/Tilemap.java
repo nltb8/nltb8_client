@@ -121,10 +121,32 @@ public class Tilemap {
    public static mHashtable treeTop_bottom = new mHashtable();
    
    // === Tile Overlay Layers ===
-   /** Top-layer tiles (rendered after player, e.g., bridges) */
+   /** 
+    * Top-layer tiles (rendered after player, e.g., bridges)
+    * @deprecated Use tileTopArray for better performance
+    */
    public static mHashtable tileTop = new mHashtable();
-   /** Layer 3 tiles (rendered with base tiles) */
+   
+   /** 
+    * Layer 3 tiles (rendered with base tiles)
+    * @deprecated Use tileLayer3Array for better performance
+    */
    public static mHashtable tileLayer3 = new mHashtable();
+   
+   // === Tile Overlay Arrays (Performance Optimized) ===
+   /** 
+    * 2D array for top-layer tiles. Access: tileTopArray[y][x]
+    * Replaces tileTop hashtable for O(1) lookup without garbage creation.
+    * Null entries indicate no top tile at that position.
+    */
+   private static TileTop[][] tileTopArray;
+   
+   /** 
+    * 2D array for layer 3 tiles. Access: tileLayer3Array[y][x]
+    * Replaces tileLayer3 hashtable for O(1) lookup without garbage creation.
+    * Null entries indicate no layer 3 tile at that position.
+    */
+   private static TileTop[][] tileLayer3Array;
    
    // === Animation State ===
    /** Animation frame sequence for animated tiles */
@@ -217,6 +239,9 @@ public class Tilemap {
       paintLayerTree23 = 1;
       map = null;
       tileLayer3.clear();
+      tileLayer3Array = null;
+      tileTop.clear();
+      tileTopArray = null;
       treeLow1.clear();
       treeLow2.clear();
       treeLow3.clear();
@@ -230,6 +255,76 @@ public class Tilemap {
    }
 
    public void resetData() {
+   }
+
+   // ========================================================================
+   // TILE OVERLAY ARRAY MANAGEMENT (Performance Optimization)
+   // ========================================================================
+
+   /**
+    * Initializes the 2D tile overlay arrays based on current map dimensions.
+    * Must be called after map dimensions (w, h) are set during map load.
+    * Creates arrays of size [h][w] initialized to null.
+    */
+   private static void initializeTileArrays() {
+      if (w > 0 && h > 0) {
+         tileTopArray = new TileTop[h][w];
+         tileLayer3Array = new TileTop[h][w];
+      }
+   }
+
+   /**
+    * Sets a top-layer tile at the specified position.
+    * @param x Tile X coordinate (0 to w-1)
+    * @param y Tile Y coordinate (0 to h-1)
+    * @param tile TileTop object to place at this position
+    */
+   private static void setTileTop(int x, int y, TileTop tile) {
+      if (tileTopArray != null && y >= 0 && y < h && x >= 0 && x < w) {
+         tileTopArray[y][x] = tile;
+      }
+      // Also maintain hashtable for compatibility
+      tileTop.put(new Integer(y * w + x), tile);
+   }
+
+   /**
+    * Gets a top-layer tile at the specified position.
+    * @param x Tile X coordinate (0 to w-1)
+    * @param y Tile Y coordinate (0 to h-1)
+    * @return TileTop object at this position, or null if none
+    */
+   private static TileTop getTileTop(int x, int y) {
+      if (tileTopArray != null && y >= 0 && y < h && x >= 0 && x < w) {
+         return tileTopArray[y][x];
+      }
+      return null;
+   }
+
+   /**
+    * Sets a layer 3 tile at the specified position.
+    * @param x Tile X coordinate (0 to w-1)
+    * @param y Tile Y coordinate (0 to h-1)
+    * @param tile TileTop object to place at this position
+    */
+   private static void setTileLayer3(int x, int y, TileTop tile) {
+      if (tileLayer3Array != null && y >= 0 && y < h && x >= 0 && x < w) {
+         tileLayer3Array[y][x] = tile;
+      }
+      // Also maintain hashtable for compatibility
+      tileLayer3.put(String.valueOf(y * w + x), tile);
+   }
+
+   /**
+    * Gets a layer 3 tile at the specified position.
+    * @param x Tile X coordinate (0 to w-1)
+    * @param y Tile Y coordinate (0 to h-1)
+    * @return TileTop object at this position, or null if none
+    */
+   private static TileTop getTileLayer3(int x, int y) {
+      if (tileLayer3Array != null && y >= 0 && y < h && x >= 0 && x < w) {
+         return tileLayer3Array[y][x];
+      }
+      return null;
    }
 
    public static void loadMap(int level, byte[] byteMap) {
@@ -293,6 +388,9 @@ public class Tilemap {
          map = new short[w * h];
          tileTop.clear();
          Tilemap.type = new int[w * h];
+         
+         // Initialize optimized tile arrays for fast O(1) access
+         initializeTileArrays();
 
          int x;
          for(x = 0; x < w * h; ++x) {
@@ -454,7 +552,8 @@ public class Tilemap {
                            top.x = (short)id;
                            top.y = (short)j;
                            top.index = (short)value;
-                           tileLayer3.put(String.valueOf(j * w + id), top);
+                           // Use optimized array storage
+                           setTileLayer3(id, j, top);
                         }
                      } catch (Exception var14) {
                         var14.printStackTrace();
@@ -500,7 +599,8 @@ public class Tilemap {
                      tile.y = (short)y;
                      tile.x = (short)x;
                      tile.index = value;
-                     tileTop.put(new Integer(y * w + x), tile);
+                     // Use optimized array storage
+                     setTileTop(x, y, tile);
                   }
                }
             }
@@ -517,7 +617,8 @@ public class Tilemap {
                      tile.y = (short)i;
                      tile.x = (short)id;
                      tile.index = dx;
-                     tileTop.put(new Integer(i * w + id), tile);
+                     // Use optimized array storage
+                     setTileTop(id, i, tile);
                   }
                }
             }
@@ -768,7 +869,7 @@ public class Tilemap {
             }
 
             // Draw layer 3 overlay tile if present
-            TileTop top = (TileTop)tileLayer3.get(String.valueOf(getTileIndex(i, j)));
+            TileTop top = getTileLayer3(i, j);
             if (top != null) {
                top.paint(g);
             }
@@ -814,7 +915,7 @@ public class Tilemap {
             }
 
             // Draw layer 3 overlay tile if present
-            TileTop top = (TileTop)tileLayer3.get(String.valueOf(getTileIndex(tileX, tileY)));
+            TileTop top = getTileLayer3(tileX, tileY);
             if (top != null) {
                top.paint(g);
             }
@@ -1349,11 +1450,15 @@ public class Tilemap {
     * 
     * RENDERING ORDER:
     * 1. Tree layer 11 (depth 13)
-    * 2. Top-layer tiles from tileTop hashtable (with viewport culling)
+    * 2. Top-layer tiles from tileTopArray (with viewport culling)
     * 
     * VIEWPORT CULLING:
     * Uses GameScr viewport bounds (gssx, gssy, gssxe, gssye) with 1-tile buffer
     * to ensure smooth rendering when camera moves.
+    * 
+    * PERFORMANCE:
+    * Uses optimized 2D array (tileTopArray) instead of hashtable for O(1) lookup
+    * without garbage creation from String.valueOf() calls.
     * 
     * @param g Graphics context for rendering
     */
@@ -1365,18 +1470,21 @@ public class Tilemap {
       // Render tree layer 11 first
       paintTreeLayer(g, trees11, 13);
       
-      // Render top-layer tiles with viewport culling
-      if (tileTop.size() > 0) {
-         Enumeration k = tileTop.keys();
+      // Render top-layer tiles with viewport culling using optimized array
+      if (tileTopArray != null) {
+         // Calculate visible bounds with 1-tile buffer
+         int startY = Math.max(0, GameCanvas.gameScr.gssy);
+         int endY = Math.min(h - 1, GameCanvas.gameScr.gssye);
+         int startX = Math.max(0, GameCanvas.gameScr.gssx - 1);
+         int endX = Math.min(w - 1, GameCanvas.gameScr.gssxe + 1);
          
-         while(k.hasMoreElements()) {
-            Integer key = (Integer)k.nextElement();
-            TileTop tile = (TileTop)tileTop.get(key);
-            
-            // Only render if tile is in or near viewport (1-tile buffer)
-            if (tile.y >= GameCanvas.gameScr.gssy && tile.y <= GameCanvas.gameScr.gssye 
-                && tile.x >= GameCanvas.gameScr.gssx - 1 && tile.x <= GameCanvas.gameScr.gssxe + 1) {
-               tile.paint(g);
+         // Only iterate through visible tiles
+         for (int tileY = startY; tileY <= endY; tileY++) {
+            for (int tileX = startX; tileX <= endX; tileX++) {
+               TileTop tile = tileTopArray[tileY][tileX];
+               if (tile != null) {
+                  tile.paint(g);
+               }
             }
          }
       }

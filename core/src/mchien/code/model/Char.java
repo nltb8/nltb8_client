@@ -1068,38 +1068,50 @@ public class Char extends LiveActor {
         }
     }
 
+    /**
+     * Gets the quest state for this character (NPCs only).
+     * @return Quest state: 0=new quest available, 1=quest complete, 2=quest in progress, -1=no quest
+     */
     public int getStateQuest() {
-        if (this.isNPC()) {
-            int state = GameScr.getIdImgQuest(this.idBot);
-            if (state == 0) {
-                return 0;
-            }
-
-            if (state == 1) {
-                return 2;
-            }
-
-            if (state == 2) {
-                return 1;
-            }
+        if (!this.isNPC()) {
+            return -1;
         }
-
-        return -1;
+        
+        int state = GameScr.getIdImgQuest(this.idBot);
+        switch (state) {
+            case 0: return 0;  // New quest
+            case 1: return 2;  // Quest in progress
+            case 2: return 1;  // Quest complete
+            default: return -1;
+        }
     }
 
+    /**
+     * Paints character as an avatar (portrait view).
+     * Simplified overload for common use case.
+     */
     public void paint(mGraphics g, int x, int y, int pos) {
         this.paintCharAVT(g, x, y, this.partPaint, 0, this.frameWearing, false);
     }
 
+    /**
+     * Updates the character frame animation for wearing/equipment.
+     * Called every game tick to animate equipment.
+     */
     public void updateCharFrame() {
-        if (GameCanvas.gameTick % 5 == 0) {
+        if (GameCanvas.gameTick % CharacterRenderConstants.FRAME_UPDATE_INTERVAL == 0) {
             this.frameWearing = (byte) ((this.frameWearing + 1) % 2);
         }
-
     }
 
+    /**
+     * Gets the character's gender based on class.
+     * @return 0 for male (Thieu Lam, Cai Bang, Vo Dang), 1 for female (Nga Mi, Ngu Doc)
+     */
     public int getGender() {
-        return this.clazz != 0 && this.clazz != 1 && this.clazz != 3 ? 1 : 0;
+        // Male classes: THIEU_LAM (0), CAI_BANG (1), VO_DANG (3)
+        // Female classes: NGA_MI (2), NGU_DOC (4)
+        return (this.clazz == THIEU_LAM || this.clazz == CAI_BANG || this.clazz == VO_DANG) ? 0 : 1;
     }
 
     public static void load() {

@@ -73,21 +73,22 @@ public class MainMenu
     public static boolean isPhiPhong;
     public static boolean isChuyenHoa;
     public static boolean isHopda;
-    public static final byte SHOP = 0;
-    public static final byte HANHTRANG = 1;
-    public static final byte TRANGBI = 2;
-    public static final byte SKILL = 3;
-    public static final byte QUEST = 4;
-    public static final byte NAP_XU = 5;
-    public static final byte BANG_HOI = 6;
-    public static final byte HOAT_DONG = 7;
-    public static final byte DAP_DO = 8;
-    public static final byte CHE_DO = 9;
-    public static final byte CHUYEN_HOA = 10;
-    public static final byte TAO_PHI_PHONG = 11;
-    public static final byte PET_ITEM = 12;
-    public static final byte BAG = 22;
-    public static final byte SKILL_CLAN = 29;
+    // Use MenuConstants for tab indices - keeping for backward compatibility
+    public static final byte SHOP = MenuConstants.TAB_SHOP;
+    public static final byte HANHTRANG = MenuConstants.TAB_INVENTORY;
+    public static final byte TRANGBI = MenuConstants.TAB_EQUIPMENT;
+    public static final byte SKILL = MenuConstants.TAB_SKILL;
+    public static final byte QUEST = MenuConstants.TAB_QUEST;
+    public static final byte NAP_XU = MenuConstants.TAB_RECHARGE;
+    public static final byte BANG_HOI = MenuConstants.TAB_CLAN;
+    public static final byte HOAT_DONG = MenuConstants.TAB_ACTIVITY;
+    public static final byte DAP_DO = MenuConstants.TAB_UPGRADE;
+    public static final byte CHE_DO = MenuConstants.TAB_CHEDO;
+    public static final byte CHUYEN_HOA = MenuConstants.TAB_TRANSFORM;
+    public static final byte TAO_PHI_PHONG = MenuConstants.TAB_CREATE_MOUNT;
+    public static final byte PET_ITEM = MenuConstants.TAB_PET;
+    public static final byte BAG = MenuConstants.TAB_BAG;
+    public static final byte SKILL_CLAN = MenuConstants.TAB_CLAN_SKILL;
     public int[] maptopaintMenuIcon;
     public int[] maptopaintIconTrangBi;
     public static int[] indexpaintIconSettings;
@@ -362,21 +363,22 @@ public class MainMenu
         index = new byte[1];
         captionServer = "";
         infoBuySellServer = "";
-        POS_BODY = (byte) 5;
-        POS_HAT = 0;
-        POS_SHOES = (byte) 8;
-        POS_GLOVE = (byte) 7;
-        POS_WEAPON = (byte) 9;
-        POS_RING_LEFT = (byte) 3;
-        POS_RING_RIGHT = (byte) 4;
-        POS_CHAIN = 1;
-        POS_JEWELRY = (byte) 2;
-        POS_BELT = (byte) 6;
-        POS_THU_CUOI = (byte) 11;
-        POS_PHI_PHONG = (byte) 10;
-        POS_AN = (byte) 13;
-        POS_PET = (byte) 14;
-        POS_THOI_TRANG = (byte) 12;
+        // Use EquipmentSlot constants - keeping for backward compatibility
+        POS_BODY = EquipmentSlot.POS_BODY;
+        POS_HAT = EquipmentSlot.POS_HAT;
+        POS_SHOES = EquipmentSlot.POS_SHOES;
+        POS_GLOVE = EquipmentSlot.POS_GLOVE;
+        POS_WEAPON = EquipmentSlot.POS_WEAPON;
+        POS_RING_LEFT = EquipmentSlot.POS_RING_LEFT;
+        POS_RING_RIGHT = EquipmentSlot.POS_RING_RIGHT;
+        POS_CHAIN = EquipmentSlot.POS_CHAIN;
+        POS_JEWELRY = EquipmentSlot.POS_JEWELRY;
+        POS_BELT = EquipmentSlot.POS_BELT;
+        POS_THU_CUOI = EquipmentSlot.POS_MOUNT;
+        POS_PHI_PHONG = EquipmentSlot.POS_WING;
+        POS_AN = EquipmentSlot.POS_FOOD;
+        POS_PET = EquipmentSlot.POS_PET;
+        POS_THOI_TRANG = EquipmentSlot.POS_COSTUME;
         POS_ITEM_IN_EQUIP = new byte[] { POS_BODY, POS_HAT, POS_SHOES, POS_GLOVE, POS_WEAPON, POS_WEAPON, POS_WEAPON,
                 POS_WEAPON, POS_WEAPON, POS_RING_LEFT, POS_CHAIN, POS_JEWELRY, POS_BELT, -1, -1, -1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, POS_PET, -1, -1, POS_AN, -1, -1, -1, -1,
@@ -772,63 +774,16 @@ public class MainMenu
         }
     }
 
+    /**
+     * Get equipment position for an item
+     * Delegates to EquipmentSlot helper for cleaner code
+     * 
+     * @param it Item template
+     * @param pos Current position
+     * @return Equipment position or -1 if invalid
+     */
     public static int getPos(ItemTemplate it, int pos) {
-        if (it == null) {
-            return -1;
-        }
-        switch (it.type) {
-            case 0:
-            case 14: {
-                return 0;
-            }
-            case 1:
-            case 16: {
-                return 1;
-            }
-            case 2:
-            case 17: {
-                return 2;
-            }
-            case 3: {
-                return 9;
-            }
-            case 4: {
-                return 9;
-            }
-            case 5: {
-                return 9;
-            }
-            case 6: {
-                return 9;
-            }
-            case 7: {
-                return 9;
-            }
-            case 8: {
-                if (pos != 1) {
-                    return 6;
-                }
-                return 5;
-            }
-            case 9:
-            case 18: {
-                return 4;
-            }
-            case 10: {
-                return 7;
-            }
-            case 11: {
-                return 3;
-            }
-            case 12: {
-                return 8;
-            }
-            case 13:
-            case 15: {
-                return 3;
-            }
-        }
-        return -1;
+        return EquipmentSlot.getEquipmentPosition(it, pos);
     }
 
     private void paintDapDo(mGraphics g, boolean isChar) {
@@ -837,14 +792,11 @@ public class MainMenu
         int xShowText1 = this.xInfoWearing;
         int wShowText1 = this.wInfoWearing + 2;
         int hShowText1 = this.hInfoWearing - 4 + (this.isAnimal ? this.size : 0) - this.size + this.hIP / 2;
-        g.setColor(-13232632);
-        g.fillRect(xShowText1, yShowText1, wShowText1, hShowText1, false);
-        g.setColor(-1596632);
-        g.fillRect(xShowText1 + 1, yShowText1 + 1, wShowText1 - 2, hShowText1 - 2, false);
-        g.setColor(-13232632);
-        g.fillRect(xShowText1 + 2, yShowText1 + 2, wShowText1 - 4, hShowText1 - 4, false);
-        g.setColor(-14864849);
-        g.fillRect(xShowText1 + 3, yShowText1 + 3, wShowText1 - 6, hShowText1 - 6, false);
+        
+        // Paint background using helper - cleaner code
+        MenuPaintHelper.paintMenuBackground(g, xShowText1, yShowText1, wShowText1, hShowText1);
+        
+        // Draw corner decorations
         g.drawRegion(GameScr.imgBoder[6], 0, 0, 9, 9, 7, xShowText1 + wShowText1, yShowText1 + hShowText1,
                 mGraphics.BOTTOM | mGraphics.RIGHT, false);
         g.drawRegion(GameScr.imgBoder[6], 0, 0, 9, 9, 1, xShowText1, yShowText1 + hShowText1,
@@ -852,26 +804,13 @@ public class MainMenu
         g.drawRegion(GameScr.imgBoder[6], 0, 0, 9, 9, 0, xShowText1, yShowText1, mGraphics.TOP | mGraphics.LEFT, false);
         g.drawRegion(GameScr.imgBoder[6], 0, 0, 9, 9, 2, xShowText1 + wShowText1, yShowText1,
                 mGraphics.TOP | mGraphics.RIGHT, false);
+        
         int xbg = this.x + this.size + 8;
         int ybg = yShowText1;
         if (GameCanvas.w > 200) {
-            g.setColor(-9751532);
             int hh0 = hShowText1 + (this.isAnimal ? this.size : 0);
-            g.fillRect(xbg + 3, ybg, 2 * this.size - 6, hh0, false);
-            g.fillRect(xbg, ybg + 3, 2 * this.size, hh0 - 6, false);
-            g.setColor(-4891370);
-            g.drawLine(xbg + 3, ybg + 3 + hh0 - 6 + 1, xbg + 2 * this.size - 6, ybg + 3 + hh0 - 6 + 1, false);
-            if (isFocusCharWearing && GameCanvas.gameTick / 4 % 4 != 0) {
-                g.setColor(-12246258);
-            } else {
-                g.setColor(-14864849);
-            }
-            g.fillRect(xbg + 3, ybg + 3, 2 * this.size - 6, hh0 - 6, false);
-            g.setColor(-110);
-            g.fillRect(xbg + 3, ybg + 1, 2 * this.size - 6, 1, false);
-            g.setColor(-4034289);
-            g.fillRect(xbg + 1, ybg + 16, 1, hh0 - 18, false);
-            g.fillRect(xbg - 2 + 2 * this.size, ybg + 16, 1, hh0 - 18, false);
+            // Paint character area using helper - more readable
+            MenuPaintHelper.paintCharacterArea(g, xbg, ybg, 2 * this.size, hh0, isFocusCharWearing);
         }
         g.drawRegion(GameScr.imgBoder[4], 0, 16, 16, 16, 2, xbg + 2 * this.size, ybg,
                 mGraphics.BOTTOM | mGraphics.RIGHT, false);

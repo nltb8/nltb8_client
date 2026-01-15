@@ -199,6 +199,14 @@ public class Tilemap {
    private static int cachedTreeViewportExpansion = 0;
    /** Last zoom level used for tree viewport cache */
    private static int lastZoomLevelForTreeCache = -1;
+   
+   /** 
+    * Pre-computed lookup table for animated tile types.
+    * Dimensions: [maxIdTile+1][16][16]
+    * Access: typeThacLookup[idTile][dx][dy] returns animation type or -1
+    * Initialized once on first use to replace 200+ if-else comparisons.
+    */
+   private static byte[][][] typeThacLookup = null;
 
    public static void getImg() {
    }
@@ -993,7 +1001,76 @@ public class Tilemap {
       }
    }
 
-   public static byte getTypeThac(int idTile, int dx, int dy) {
+   // ========================================================================
+   // ANIMATED TILE TYPE LOOKUP (Performance Optimization)
+   // ========================================================================
+
+   /**
+    * Initializes the animated tile type lookup table.
+    * Pre-computes all results from getTypeThac() into a 3D array for O(1) access.
+    * Called once on first use to eliminate 200+ if-else comparisons per lookup.
+    */
+   private static void initializeTypeThacLookup() {
+      // Max idTile we support is 6, so array size is 7
+      typeThacLookup = new byte[7][16][16];
+      
+      // Initialize all to -1 (no animation)
+      for (int idTile = 0; idTile < 7; idTile++) {
+         for (int dx = 0; dx < 16; dx++) {
+            for (int dy = 0; dy < 16; dy++) {
+               typeThacLookup[idTile][dx][dy] = -1;
+            }
+         }
+      }
+      
+      // Pre-compute all animation mappings by calling original method
+      for (int idTile = 0; idTile <= 6; idTile++) {
+         for (int dx = 0; dx < 16; dx++) {
+            for (int dy = 0; dy < 16; dy++) {
+               byte type = getTypeThacOriginal(idTile, dx, dy);
+               if (type != -1) {
+                  typeThacLookup[idTile][dx][dy] = type;
+               }
+            }
+         }
+      }
+   }
+
+   /**
+    * Fast lookup for animated tile type using pre-computed table.
+    * Replaces getTypeThac() with O(1) array access instead of 200+ comparisons.
+    * 
+    * @param idTile Tileset ID (0, 3, 5, or 6)
+    * @param dx Tile X coordinate in atlas (0-15)
+    * @param dy Tile Y coordinate in atlas (0-15)
+    * @return Animation type index, or -1 if tile is not animated
+    */
+   public static byte getTypeThacFast(int idTile, int dx, int dy) {
+      // Lazy initialization on first call
+      if (typeThacLookup == null) {
+         initializeTypeThacLookup();
+      }
+      
+      // Bounds check
+      if (idTile < 0 || idTile >= typeThacLookup.length || 
+          dx < 0 || dx >= 16 || dy < 0 || dy >= 16) {
+         return -1;
+      }
+      
+      return typeThacLookup[idTile][dx][dy];
+   }
+
+   /**
+    * Original implementation of animated tile type lookup.
+    * Renamed from getTypeThac() to preserve original logic.
+    * Used only during initialization of lookup table.
+    * 
+    * @param idTile Tileset ID (0, 3, 5, or 6)
+    * @param dx Tile X coordinate in atlas (0-15)
+    * @param dy Tile Y coordinate in atlas (0-15)
+    * @return Animation type index, or -1 if tile is not animated
+    */
+   private static byte getTypeThacOriginal(int idTile, int dx, int dy) {
       if (idTile == 0) {
          if (dx == 0 && dy == 1) {
             return 0;
@@ -1421,6 +1498,20 @@ public class Tilemap {
       }
 
       return -1;
+   }
+
+   /**
+    * Public API for animated tile type lookup.
+    * Delegates to optimized lookup table implementation.
+    * Kept for backward compatibility with existing code.
+    * 
+    * @param idTile Tileset ID (0, 3, 5, or 6)
+    * @param dx Tile X coordinate in atlas (0-15)
+    * @param dy Tile Y coordinate in atlas (0-15)
+    * @return Animation type index, or -1 if tile is not animated
+    */
+   public static byte getTypeThac(int idTile, int dx, int dy) {
+      return getTypeThacFast(idTile, dx, dy);
    }
 
    public static void paintTreeLayer(mGraphics g, mVector tree, int layer) {

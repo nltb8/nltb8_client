@@ -7,57 +7,116 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import lib.MyStream;
 
+/**
+ * Lớp Message - Đóng gói dữ liệu giao tiếp giữa client và server
+ * 
+ * Message bao gồm:
+ * - command: Mã lệnh định danh loại message (1 byte)
+ * - data: Dữ liệu đi kèm (mảng byte)
+ * 
+ * Có 2 loại message:
+ * 1. Message gửi đi (outgoing): Khởi tạo với command, ghi dữ liệu qua writer()
+ * 2. Message nhận về (incoming): Khởi tạo với command + data, đọc dữ liệu qua reader()
+ * 
+ * @author NLTB8 Team
+ */
 public class Message {
-   public byte command;
-   private ByteArrayOutputStream os = null;
-   private DataOutputStream dos = null;
-   private ByteArrayInputStream is = null;
-   private MyStream dis = null;
+    /**
+     * Mã lệnh của message (1 byte)
+     * Định danh loại message và cách xử lý tương ứng
+     */
+    public byte command;
+    
+    // Các stream để GHI dữ liệu (dùng khi tạo message gửi đi)
+    private ByteArrayOutputStream os = null;
+    private DataOutputStream dos = null;
+    
+    // Các stream để ĐỌC dữ liệu (dùng khi nhận message về)
+    private ByteArrayInputStream is = null;
+    private MyStream dis = null;
 
-   public Message() {
-   }
+    /**
+     * Constructor mặc định
+     */
+    public Message() {
+    }
 
-   public Message(int command) {
-      this.command = (byte)command;
-      this.os = new ByteArrayOutputStream();
-      this.dos = new DataOutputStream(this.os);
-   }
+    /**
+     * Tạo message mới để GỬI ĐI với mã lệnh cho trước
+     * 
+     * @param command Mã lệnh của message (int sẽ được cast về byte)
+     */
+    public Message(int command) {
+        this.command = (byte)command;
+        this.os = new ByteArrayOutputStream();
+        this.dos = new DataOutputStream(this.os);
+    }
 
-   public Message(byte command) {
-      this.command = command;
-      this.os = new ByteArrayOutputStream();
-      this.dos = new DataOutputStream(this.os);
-   }
+    /**
+     * Tạo message mới để GỬI ĐI với mã lệnh cho trước
+     * 
+     * @param command Mã lệnh của message
+     */
+    public Message(byte command) {
+        this.command = command;
+        this.os = new ByteArrayOutputStream();
+        this.dos = new DataOutputStream(this.os);
+    }
 
-   public Message(byte command, byte[] data) {
-      this.command = command;
-      this.is = new ByteArrayInputStream(data);
-      this.dis = new MyStream(data, false);
-   }
+    /**
+     * Tạo message từ dữ liệu NHẬN VỀ từ server
+     * 
+     * @param command Mã lệnh của message
+     * @param data Dữ liệu đi kèm message
+     */
+    public Message(byte command, byte[] data) {
+        this.command = command;
+        this.is = new ByteArrayInputStream(data);
+        this.dis = new MyStream(data, false);
+    }
 
-   public byte[] getData() {
-      return this.os.toByteArray();
-   }
+    /**
+     * Lấy dữ liệu đã ghi vào message (dùng khi gửi message)
+     * 
+     * @return Mảng byte chứa dữ liệu message
+     */
+    public byte[] getData() {
+        return this.os.toByteArray();
+    }
 
-   public DataInputStream reader() {
-      return this.dis.reader();
-   }
+    /**
+     * Lấy reader để ĐỌC dữ liệu từ message nhận về
+     * 
+     * @return DataInputStream để đọc dữ liệu
+     */
+    public DataInputStream reader() {
+        return this.dis.reader();
+    }
 
-   public DataOutputStream writer() {
-      return this.dos;
-   }
+    /**
+     * Lấy writer để GHI dữ liệu vào message trước khi gửi
+     * 
+     * @return DataOutputStream để ghi dữ liệu
+     */
+    public DataOutputStream writer() {
+        return this.dos;
+    }
 
-   public void cleanup() {
-      try {
-         if (this.dis != null) {
-            this.dis.close();
-         }
+    /**
+     * Giải phóng tài nguyên của message
+     * Đóng các stream đang mở
+     */
+    public void cleanup() {
+        try {
+            if (this.dis != null) {
+                this.dis.close();
+            }
 
-         if (this.dos != null) {
-            this.dos.close();
-         }
-      } catch (IOException var2) {
-      }
-
-   }
+            if (this.dos != null) {
+                this.dos.close();
+            }
+        } catch (IOException var2) {
+            // Bỏ qua lỗi khi đóng stream
+        }
+    }
 }

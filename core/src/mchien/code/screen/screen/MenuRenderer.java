@@ -4,6 +4,7 @@ import lib.mGraphics;
 import mchien.code.main.GameCanvas;
 import mchien.code.model.mCommand;
 import lib2.mFont;
+import mchien.code.screen.Res;
 
 /**
  * Helper class for rendering simple menu items

@@ -1,6 +1,7 @@
 package mchien.code.screen.screen;
 
 import lib.mGraphics;
+import mchien.code.main.GameCanvas;
 
 /**
  * Helper class for common menu painting operations

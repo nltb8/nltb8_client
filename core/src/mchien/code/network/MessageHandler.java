@@ -260,6 +260,7 @@ public class MessageHandler extends Cmd_message implements IMessageHandler, IAct
                 case -30:
                     // Menu option
                     GameCanvas.readMessenge.onMenu_Option(msg);
+                    break;
                     
                 case -22:
                 case 14:

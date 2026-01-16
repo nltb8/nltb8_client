@@ -311,10 +311,10 @@ public class Session_ME implements ISession {
      * @return Byte đã giải mã
      */
     private byte readKey(byte b) {
-        byte[] var10000 = this.key;
-        byte var10003 = this.curR;
-        this.curR = (byte)(var10003 + 1);
-        byte result = (byte)(var10000[var10003] & 255 ^ b & 255);
+        byte[] keyArray = this.key;
+        byte currentReadIndex = this.curR;
+        this.curR = (byte)(currentReadIndex + 1);
+        byte result = (byte)(keyArray[currentReadIndex] & 255 ^ b & 255);
         
         // Quay vòng con trỏ khi hết key
         if (this.curR >= this.key.length) {
@@ -334,10 +334,10 @@ public class Session_ME implements ISession {
      * @return Byte đã mã hóa
      */
     private byte writeKey(byte b) {
-        byte[] var10000 = this.key;
-        byte var10003 = this.curW;
-        this.curW = (byte)(var10003 + 1);
-        byte result = (byte)(var10000[var10003] & 255 ^ b & 255);
+        byte[] keyArray = this.key;
+        byte currentWriteIndex = this.curW;
+        this.curW = (byte)(currentWriteIndex + 1);
+        byte result = (byte)(keyArray[currentWriteIndex] & 255 ^ b & 255);
         
         // Quay vòng con trỏ khi hết key
         if (this.curW >= this.key.length) {
